@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToxiMap - Poison Risk Calculator</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
+  h1 { color: #d9534f; }
+  label { display: block; margin-top: 15px; }
+  input[type=number], select { margin-top: 5px; padding: 5px; width: 80px; }
+  button { margin-top: 20px; padding: 10px 15px; font-size: 1em; background: #d9534f; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
+  button:hover { background: #c9302c; }
+  #result { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
+</style>
+</head>
+<body>
+
+<h1>ToxiMap - Poison Risk Calculator</h1>
+<p>Enter the severity (HLT) and Critical Onset Window (COW) to calculate the Poison Risk Rating (PRR 1–10).</p>
+
+<label for="hlt">Exposure Severity (HLT) [0–1]:</label>
+<input type="number" id="hlt" min="0" max="1" step="0.01" value="0.5">
+
+<label for="cow">Critical Onset Window (COW) [0–1]:</label>
+<input type="number" id="cow" min="0" max="1" step="0.01" value="0.5">
+
+<button onclick="calculatePRR()">Calculate PRR</button>
+
+<div id="result"></div>
+
+<script>
+function calculatePRR() {
+  // Get values
+  let hlt = parseFloat(document.getElementById('hlt').value);
+  let cow = parseFloat(document.getElementById('cow').value);
+
+  // Ensure values are in 0-1 range
+  if(isNaN(hlt) || isNaN(cow) || hlt < 0 || hlt > 1 || cow < 0 || cow > 1){
+    document.getElementById('result').innerHTML = "Please enter values between 0 and 1 for both HLT and COW.";
+    return;
+  }
+
+  // Weighted formula: HLT (severity) = 60%, COW (speed) = 40%
+  let score = (hlt * 0.6) + (cow * 0.4);
+
+  // Convert to PRR 1–10
+  let prr = Math.ceil(score * 10);
+  if(prr < 1) prr = 1;
+  if(prr > 10) prr = 10;
+
+  // Interpret PRR
+  let interpretation = "";
+  switch(prr){
+    case 1:
+    case 2:
+      interpretation = "Negligible risk – minimal symptoms expected.";
+      break;
+    case 3:
+    case 4:
+      interpretation = "Low risk – mild symptoms possible, monitor situation.";
+      break;
+    case 5:
+    case 6:
+      interpretation = "Moderate risk – medical attention advised.";
+      break;
+    case 7:
+    case 8:
+      interpretation = "Severe risk – urgent care likely required.";
+      break;
+    case 9:
+      interpretation = "Critical risk – immediate medical response recommended.";
+      break;
+    case 10:
+      interpretation = "Extreme risk – minutes matter, emergency intervention required.";
+      break;
+  }
+
+  // Display result
+  document.getElementById('result').innerHTML = 
+    "Poison Risk Rating (PRR): " + prr + "/10<br>" + interpretation;
+}
+</script>
+
+</body>
