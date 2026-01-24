@@ -5,19 +5,74 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ToxiMap - Poison Risk Calculator</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; color: #333; }
-  h1 { color: #d9534f; }
-  label { display: block; margin-top: 15px; }
-  input[type=number], select { margin-top: 5px; padding: 5px; width: 80px; }
-  button { margin-top: 20px; padding: 10px 15px; font-size: 1em; background: #d9534f; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
-  button:hover { background: #c9302c; }
-  #result { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f9f9f9;
+    color: #333;
+  }
+  h1 {
+    color: #d9534f;
+  }
+  h2 {
+    margin-top: 25px;
+    color: #d9534f;
+  }
+  p {
+    margin-top: 10px;
+    line-height: 1.4;
+  }
+  label {
+    display: block;
+    margin-top: 15px;
+  }
+  input[type=number] {
+    margin-top: 5px;
+    padding: 5px;
+    width: 80px;
+  }
+  button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    font-size: 1em;
+    background: #d9534f;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  button:hover {
+    background: #c9302c;
+  }
+  #result {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
 </style>
 </head>
 <body>
 
 <h1>ToxiMap - Poison Risk Calculator</h1>
-<p>Enter the severity (HLT) and Critical Onset Window (COW) to calculate the Poison Risk Rating (PRR 1–10).</p>
+<p>Estimate the <strong>Poison Risk Rating (PRR)</strong> based on venom exposure and how fast it acts.</p>
+
+<h2>Input Explanations</h2>
+
+<p>
+<strong>HLT (Human Lethality Threshold):</strong>
+The estimated number of stings (or equivalent venom units) required to cause fatal systemic effects in an average human without medical intervention.
+<br>
+• Lower HLT = more dangerous venom<br>
+• Higher HLT = less dangerous venom
+</p>
+
+<p>
+<strong>COW (Critical Onset Window):</strong>
+The time (in minutes) it typically takes for life-threatening symptoms to begin after envenomation.
+<br>
+• Lower COW = faster-acting venom<br>
+• Higher COW = slower-acting venom
+</p>
 
 <label for="hlt">Exposure Severity (HLT) [0–1]:</label>
 <input type="number" id="hlt" min="0" max="1" step="0.01" value="0.5">
@@ -35,7 +90,7 @@ function calculatePRR() {
   let hlt = parseFloat(document.getElementById('hlt').value);
   let cow = parseFloat(document.getElementById('cow').value);
 
-  // Ensure values are in 0-1 range
+  // Validate
   if(isNaN(hlt) || isNaN(cow) || hlt < 0 || hlt > 1 || cow < 0 || cow > 1){
     document.getElementById('result').innerHTML = "Please enter values between 0 and 1 for both HLT and COW.";
     return;
@@ -49,7 +104,7 @@ function calculatePRR() {
   if(prr < 1) prr = 1;
   if(prr > 10) prr = 10;
 
-  // Interpret PRR
+  // Interpretation
   let interpretation = "";
   switch(prr){
     case 1:
@@ -76,10 +131,10 @@ function calculatePRR() {
       break;
   }
 
-  // Display result
   document.getElementById('result').innerHTML = 
     "Poison Risk Rating (PRR): " + prr + "/10<br>" + interpretation;
 }
 </script>
 
 </body>
+</html>
