@@ -1,138 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ToxiMap - Poison Risk Calculator</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #f9f9f9;
-    color: #333;
-  }
-  h1 {
-    color: #d9534f;
-  }
-  h2 {
-    margin-top: 25px;
-    color: #d9534f;
-  }
-  p {
-    margin-top: 10px;
-    line-height: 1.4;
-  }
-  label {
-    display: block;
-    margin-top: 15px;
-  }
-  input[type=number] {
-    margin-top: 5px;
-    padding: 5px;
-    width: 80px;
-  }
-  button {
-    margin-top: 20px;
-    padding: 10px 15px;
-    font-size: 1em;
-    background: #d9534f;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  button:hover {
-    background: #c9302c;
-  }
-  #result {
-    margin-top: 20px;
-    font-weight: bold;
-    font-size: 1.2em;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>ToxiMap – Venom Risk Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f1220;
+      color: #eaeaf0;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #ffb703;
+    }
+    .box {
+      background: #1a1d33;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select, button {
+      margin-top: 5px;
+      padding: 6px;
+      width: 100%;
+      max-width: 300px;
+    }
+    button {
+      margin-top: 15px;
+      background: #ffb703;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .result {
+      font-size: 1.2em;
+      margin-top: 10px;
+      color: #90dbf4;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    td, th {
+      border: 1px solid #555;
+      padding: 6px 10px;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #bbb;
+    }
+  </style>
 </head>
 <body>
 
-<h1>ToxiMap - Poison Risk Calculator</h1>
-<p>Estimate the <strong>Poison Risk Rating (PRR)</strong> based on venom exposure and how fast it acts.</p>
-
-<h2>Input Explanations</h2>
-
-<p>
-<strong>HLT (Human Lethality Threshold):</strong>
-The estimated number of stings (or equivalent venom units) required to cause fatal systemic effects in an average human without medical intervention.
-<br>
-• Lower HLT = more dangerous venom<br>
-• Higher HLT = less dangerous venom
+<h1>ToxiMap</h1>
+<p class="note">
+A venom lethality visualization and safety tool for education and awareness.
 </p>
 
-<p>
-<strong>COW (Critical Onset Window):</strong>
-The time (in minutes) it typically takes for life-threatening symptoms to begin after envenomation.
-<br>
-• Lower COW = faster-acting venom<br>
-• Higher COW = slower-acting venom
-</p>
+<div class="box">
+  <h2>Venom Units Explained</h2>
+  <ul>
+    <li><strong>HLT (Human Lethality Threshold):</strong> Estimated number of stings (or equivalent venom units) required to cause fatal systemic effects in an average human without medical intervention.</li>
+    <li>Lower HLT = more dangerous venom</li>
+    <li>Higher HLT = less dangerous venom</li>
+    <li><strong>COW (Collapse Onset Window):</strong> Time in minutes before systemic failure or death begins after envenomation.</li>
+    <li><strong>PRR (Poison Risk Rating):</strong> Final danger score from 1–10.</li>
+  </ul>
+</div>
 
-<label for="hlt">Exposure Severity (HLT) [0–1]:</label>
-<input type="number" id="hlt" min="0" max="1" step="0.01" value="0.5">
+<div class="box">
+  <h2>Species Catalogue</h2>
+  <label for="species">Select a species:</label>
+  <select id="species" onchange="fillSpecies()">
+    <option value="">-- Select --</option>
+    <option value="boxjelly">Box Jellyfish</option>
+  </select>
+</div>
 
-<label for="cow">Critical Onset Window (COW) [0–1]:</label>
-<input type="number" id="cow" min="0" max="1" step="0.01" value="0.5">
+<div class="box">
+  <h2>PRR Calculator</h2>
 
-<button onclick="calculatePRR()">Calculate PRR</button>
+  <label for="hlt">HLT (number of stings):</label>
+  <input type="number" id="hlt" placeholder="e.g. 1">
 
-<div id="result"></div>
+  <label for="cow">COW (minutes to collapse/death):</label>
+  <input type="number" id="cow" placeholder="e.g. 5">
+
+  <button onclick="calculatePRR()">Calculate PRR</button>
+
+  <div class="result" id="output"></div>
+</div>
+
+<div class="box">
+  <h2>PRR Scale</h2>
+  <table>
+    <tr><th>PRR</th><th>Meaning</th></tr>
+    <tr><td>1–2</td><td>Low concern, mild effects</td></tr>
+    <tr><td>3–4</td><td>Painful, medical attention advised</td></tr>
+    <tr><td>5–6</td><td>Severe envenomation possible</td></tr>
+    <tr><td>7–8</td><td>Critical, emergency treatment required</td></tr>
+    <tr><td>9–10</td><td>Rapidly lethal without intervention</td></tr>
+  </table>
+</div>
+
+<div class="box">
+  <h2>Research Log</h2>
+  <p class="note">Use this space to record species you’ve researched.</p>
+  <table contenteditable="true">
+    <tr>
+      <th>Species</th>
+      <th>HLT</th>
+      <th>COW</th>
+      <th>PRR</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td></td><td></td><td></td><td></td><td></td>
+    </tr>
+  </table>
+</div>
 
 <script>
-function calculatePRR() {
-  // Get values
-  let hlt = parseFloat(document.getElementById('hlt').value);
-  let cow = parseFloat(document.getElementById('cow').value);
+function fillSpecies() {
+  const species = document.getElementById("species").value;
+  if (species === "boxjelly") {
+    document.getElementById("hlt").value = 1;
+    document.getElementById("cow").value = 5;
+  }
+}
 
-  // Validate
-  if(isNaN(hlt) || isNaN(cow) || hlt < 0 || hlt > 1 || cow < 0 || cow > 1){
-    document.getElementById('result').innerHTML = "Please enter values between 0 and 1 for both HLT and COW.";
+function calculatePRR() {
+  const hlt = parseFloat(document.getElementById("hlt").value);
+  const cow = parseFloat(document.getElementById("cow").value);
+
+  if (hlt <= 0 || cow <= 0 || isNaN(hlt) || isNaN(cow)) {
+    document.getElementById("output").innerText =
+      "Please enter valid HLT and COW values.";
     return;
   }
 
-  // Weighted formula: HLT (severity) = 60%, COW (speed) = 40%
-  let score = (hlt * 0.6) + (cow * 0.4);
+  // Normalize values
+  const hltScore = Math.min(10, 10 / hlt);
+  const cowScore = Math.min(10, 10 / (cow / 5));
 
-  // Convert to PRR 1–10
-  let prr = Math.ceil(score * 10);
-  if(prr < 1) prr = 1;
-  if(prr > 10) prr = 10;
+  const prr = Math.min(10, Math.max(1, Math.round((hltScore + cowScore) / 2)));
 
-  // Interpretation
-  let interpretation = "";
-  switch(prr){
-    case 1:
-    case 2:
-      interpretation = "Negligible risk – minimal symptoms expected.";
-      break;
-    case 3:
-    case 4:
-      interpretation = "Low risk – mild symptoms possible, monitor situation.";
-      break;
-    case 5:
-    case 6:
-      interpretation = "Moderate risk – medical attention advised.";
-      break;
-    case 7:
-    case 8:
-      interpretation = "Severe risk – urgent care likely required.";
-      break;
-    case 9:
-      interpretation = "Critical risk – immediate medical response recommended.";
-      break;
-    case 10:
-      interpretation = "Extreme risk – minutes matter, emergency intervention required.";
-      break;
-  }
-
-  document.getElementById('result').innerHTML = 
-    "Poison Risk Rating (PRR): " + prr + "/10<br>" + interpretation;
+  document.getElementById("output").innerText =
+    "Poison Risk Rating (PRR): " + prr + " / 10";
 }
 </script>
 
