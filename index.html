@@ -1,156 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ToxiMap – Venom Risk Calculator</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f1220;
-      color: #eaeaf0;
-      padding: 20px;
-    }
-    h1, h2 {
-      color: #ffb703;
-    }
-    .box {
-      background: #1a1d33;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    input, select, button {
-      margin-top: 5px;
-      padding: 6px;
-      width: 100%;
-      max-width: 300px;
-    }
-    button {
-      margin-top: 15px;
-      background: #ffb703;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .result {
-      font-size: 1.2em;
-      margin-top: 10px;
-      color: #90dbf4;
-    }
-    table {
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    td, th {
-      border: 1px solid #555;
-      padding: 6px 10px;
-    }
-    .note {
-      font-size: 0.9em;
-      color: #bbb;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ToxiMap – Venom Risk Calculator</title>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #0f1220;
+    color: #eaeaf0;
+    padding: 20px;
+  }
+  h1, h2 {
+    color: #ffb703;
+  }
+  .box {
+    background: #1a1d33;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+  input, select, button {
+    margin-top: 5px;
+    padding: 6px;
+    width: 100%;
+    max-width: 300px;
+  }
+  button {
+    margin-top: 15px;
+    background: #ffb703;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .result {
+    font-size: 1.2em;
+    margin-top: 10px;
+    color: #90dbf4;
+  }
+  table {
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    border: 1px solid #555;
+    padding: 6px 10px;
+  }
+  .note {
+    font-size: 0.9em;
+    color: #bbb;
+  }
+</style>
 </head>
+
 <body>
 
 <h1>ToxiMap</h1>
-<p class="note">
-A venom lethality visualization and safety tool for education and awareness.
-</p>
+<p class="note">An educational venom risk mapping and safety tool.</p>
 
 <div class="box">
-  <h2>Venom Units Explained</h2>
-  <ul>
-    <li><strong>HLT (Human Lethality Threshold):</strong> Estimated number of stings (or equivalent venom units) required to cause fatal systemic effects in an average human without medical intervention.</li>
-    <li>Lower HLT = more dangerous venom</li>
-    <li>Higher HLT = less dangerous venom</li>
-    <li><strong>COW (Collapse Onset Window):</strong> Time in minutes before systemic failure or death begins after envenomation. Basically when you will die if you arent treated. passed 24 hours means it is a 1/10, so you can not enter that input.</li>
-    <li><strong>PRR (Poison Risk Rating):</strong> Final danger score from 1–10.</li>
-  </ul>
+<h2>Definitions</h2>
+<ul>
+  <li><strong>HLT (Human Lethality Threshold):</strong> Estimated number of stings or venom units required to cause fatal systemic effects in an average human without medical intervention.</li>
+  <li><strong>COW (Critical Onset Window):</strong> Time in minutes before life‑threatening symptoms begin.</li>
+  <li><strong>PRR (Poison Risk Rating):</strong> Combined danger score from 1 (low) to 10 (extreme).</li>
+</ul>
 </div>
 
 <div class="box">
-  <h2>Species Catalogue</h2>
-  <label for="species">Select a species:</label>
-  <select id="species" onchange="fillSpecies()">
-    <option value="">-- Select --</option>
-    <option value="boxjelly">Box Jellyfish</option>
-    <option value="funnelweb" data-hlt="1" data-cow="15">Sydney Funnel-web Spider</option>
+<h2>Species Catalogue</h2>
+<label for="species">Select a species:</label>
+<select id="species" onchange="fillSpecies()">
+  <option value="">-- Select --</option>
 
-  </select>
+  <option data-hlt="1" data-cow="5">
+    Box Jellyfish
+  </option>
+
+  <option data-hlt="1" data-cow="15">
+    Sydney Funnel‑web Spider
+  </option>
+
+  <option data-hlt="59" data-cow="120">
+    Asian Giant Hornet
+  </option>
+
+  <option data-hlt="100" data-cow="180">
+    Yellow‑legged Hornet
+  </option>
+</select>
 </div>
 
 <div class="box">
-  <h2>PRR Calculator</h2>
+<h2>PRR Calculator</h2>
 
-  <label for="hlt">HLT (number of stings):</label>
-  <input type="number" id="hlt" placeholder="e.g. 1">
+<label for="hlt">HLT (number of stings):</label>
+<input type="number" id="hlt" min="1">
 
-  <label for="cow">COW (minutes to collapse/death):</label>
-  <input type="number" id="cow" placeholder="e.g. 5">
+<label for="cow">COW (minutes):</label>
+<input type="number" id="cow" min="1">
 
-  <button onclick="calculatePRR()">Calculate PRR</button>
+<button onclick="calculatePRR()">Calculate PRR</button>
 
-  <div class="result" id="output"></div>
+<div class="result" id="output"></div>
 </div>
 
 <div class="box">
-  <h2>PRR Scale</h2>
-  <table>
-    <tr><th>PRR</th><th>Meaning</th></tr>
-    <tr><td>1–2</td><td>Low concern, mild effects</td></tr>
-    <tr><td>3–4</td><td>Painful, medical attention advised</td></tr>
-    <tr><td>5–6</td><td>Severe envenomation possible</td></tr>
-    <tr><td>7–8</td><td>Critical, emergency treatment required</td></tr>
-    <tr><td>9–10</td><td>Rapidly lethal without intervention</td></tr>
-  </table>
-</div>
+<h2>Research Log</h2>
+<p class="note">Write down species you’ve researched and their PRR values.</p>
 
-<div class="box">
-  <h2>Research Log</h2>
-  <p class="note">Use this space to record species you’ve researched.</p>
-  <table contenteditable="true">
-    <tr>
-      <th>Species</th>
-      <th>HLT</th>
-      <th>COW</th>
-      <th>PRR</th>
-      <th>Notes</th>
-    </tr>
-    <tr>
-      <td></td><td></td><td></td><td></td><td></td>
-    </tr>
-  </table>
+<table contenteditable="true">
+<tr>
+  <th>Species</th>
+  <th>HLT</th>
+  <th>COW</th>
+  <th>PRR</th>
+  <th>Notes</th>
+</tr>
+<tr>
+  <td></td><td></td><td></td><td></td><td></td>
+</tr>
+</table>
 </div>
 
 <script>
 function fillSpecies() {
-  const species = document.getElementById("species").value;
-  if (species === "boxjelly") {
-    document.getElementById("hlt").value = 1;
-    document.getElementById("cow").value = 5;
-  }
+  const sel = document.getElementById("species").selectedOptions[0];
+  if (!sel) return;
+
+  document.getElementById("hlt").value = sel.dataset.hlt;
+  document.getElementById("cow").value = sel.dataset.cow;
 }
 
 function calculatePRR() {
   const hlt = parseFloat(document.getElementById("hlt").value);
   const cow = parseFloat(document.getElementById("cow").value);
 
-  if (hlt <= 0 || cow <= 0 || isNaN(hlt) || isNaN(cow)) {
+  if (isNaN(hlt) || isNaN(cow) || hlt <= 0 || cow <= 0) {
     document.getElementById("output").innerText =
       "Please enter valid HLT and COW values.";
     return;
   }
 
-  // Normalize values
-  const hltScore = Math.min(10, 10 / hlt);
-  const cowScore = Math.min(10, 10 / (cow / 5));
-
-  const prr = Math.min(10, Math.max(1, Math.round((hltScore + cowScore) / 2)));
+  const severityScore = Math.min(10, 10 / hlt);
+  const speedScore = Math.min(10, 10 / (cow / 5));
+  const prr = Math.round((severityScore + speedScore) / 2);
 
   document.getElementById("output").innerText =
     "Poison Risk Rating (PRR): " + prr + " / 10";
