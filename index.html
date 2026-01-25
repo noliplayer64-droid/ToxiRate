@@ -74,32 +74,34 @@
 
 <div class="box">
 <h2>Species Catalogue</h2>
-<label for="species">Select a species:</label>
-<select id="species" onchange="fillSpecies()">
-  <option value="">-- Select --</option>
+<div class="box">
+  <h2>Species Catalogue (Search)</h2>
+  <label for="speciesSearch">Type species name:</label>
+  <input type="text" id="speciesSearch" placeholder="e.g. Box Jellyfish" oninput="searchSpecies()">
 
-  <option data-hlt="1" data-cow="5">
-    Box Jellyfish
-  </option>
-
-  <option data-hlt="1" data-cow="15">
-    Sydney Funnel‑web Spider
-  </option>
-
-  <option data-hlt="59" data-cow="120">
-    Asian Giant Hornet
-  </option>
-
-  <option data-hlt="100" data-cow="180">
-    Yellow‑legged Hornet
-  </option>
-
-  <option data-hlt="1" data-cow="120">
-    Indian red scorpion
-  </option>
-</select>
+  <p class="note">Start typing a species name to auto-fill HLT & COW. Exact match required for auto-fill.</p>
 </div>
 
+<script>
+// Catalogue data
+const catalogue = [
+  { name: "Box Jellyfish", hlt: 1, cow: 5 },
+  { name: "Sydney Funnel-web Spider", hlt: 1, cow: 15 },
+  { name: "Asian Giant Hornet", hlt: 59, cow: 120 },
+  { name: "Yellow-legged Hornet", hlt: 100, cow: 180 }
+  // You can add Vespa Impaleros later
+];
+
+// Function to search and fill
+function searchSpecies() {
+  const input = document.getElementById("speciesSearch").value.toLowerCase();
+  const match = catalogue.find(species => species.name.toLowerCase() === input);
+  if (match) {
+    document.getElementById("hlt").value = match.hlt;
+    document.getElementById("cow").value = match.cow;
+  }
+}
+</script>
 <div class="box">
 <h2>PRR Calculator</h2>
 
