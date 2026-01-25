@@ -72,11 +72,21 @@
 </ul>
 </div>
 
-  <h2>Species Catalogue (Search)</h2>
+  
+<div class="box">
+  <h2>Species Catalogue</h2>
   <label for="speciesSearch">Type species name:</label>
-  <input type="text" id="speciesSearch" placeholder="e.g. Box Jellyfish" oninput="searchSpecies()">
+  <input list="speciesOptions" id="speciesSearch" placeholder="Start typing a species..." oninput="searchSpecies()">
 
-  <p class="note">Start typing a species name to auto-fill HLT & COW. Exact match required for auto-fill.</p>
+  <datalist id="speciesOptions">
+    <option value="Box Jellyfish">
+    <option value="Sydney Funnel-web Spider">
+    <option value="Asian Giant Hornet">
+    <option value="Yellow-legged Hornet">
+    <!-- Add new species here -->
+  </datalist>
+
+  <p class="note">Start typing and select a species to auto-fill HLT & COW.</p>
 </div>
 
 <script>
@@ -89,7 +99,7 @@ const catalogue = [
   { name: "Indian Red Scorpion", hlt: 1, cow: 120 }
 ];
 
-// Function to search and fill
+// Function to fill HLT & COW from selected species
 function searchSpecies() {
   const input = document.getElementById("speciesSearch").value.toLowerCase();
   const match = catalogue.find(species => species.name.toLowerCase() === input);
@@ -98,6 +108,8 @@ function searchSpecies() {
     document.getElementById("cow").value = match.cow;
   }
 }
+</script>
+
 </script>
 <div class="box">
 <h2>PRR Calculator</h2>
@@ -111,6 +123,18 @@ function searchSpecies() {
 <button onclick="calculatePRR()">Calculate PRR</button>
 
 <div class="result" id="output"></div>
+</div>
+
+  <div class="box">
+  <h2>PRR Scale Explained</h2>
+  <table>
+    <tr><th>PRR</th><th>Meaning</th></tr>
+    <tr><td>1–2</td><td>Low concern, mostly harmless; minor pain.</td></tr>
+    <tr><td>3–4</td><td>Painful; medical attention advised for safety.</td></tr>
+    <tr><td>5–6</td><td>Severe envenomation possible; prompt care recommended.</td></tr>
+    <tr><td>7–8</td><td>Critical; emergency treatment required.</td></tr>
+    <tr><td>9–10</td><td>Rapidly lethal without immediate medical intervention.</td></tr>
+  </table>
 </div>
 
 <div class="box">
