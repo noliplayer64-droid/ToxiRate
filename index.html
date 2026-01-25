@@ -25,7 +25,7 @@
     display: block;
     margin-top: 10px;
   }
-  input, select, button {
+  input, button {
     margin-top: 5px;
     padding: 6px;
     width: 100%;
@@ -46,6 +46,7 @@
   table {
     border-collapse: collapse;
     margin-top: 10px;
+    width: 100%;
   }
   th, td {
     border: 1px solid #555;
@@ -67,51 +68,27 @@
 <h2>Definitions</h2>
 <ul>
   <li><strong>HLT (Human Lethality Threshold):</strong> Estimated number of stings or venom units required to cause fatal systemic effects in an average human without medical intervention.</li>
-  <li><strong>COW (Critical Onset Window):</strong> Time in minutes before life‑threatening symptoms begin. Basically how long you have to live and how urgent your medical attention is.</li>
+  <li><strong>COW (Critical Onset Window):</strong> Minutes before life-threatening symptoms begin; lower COW = faster danger.</li>
   <li><strong>PRR (Poison Risk Rating):</strong> Combined danger score from 1 (low) to 10 (extreme).</li>
 </ul>
 </div>
 
-  
 <div class="box">
-  <h2>Species Catalogue</h2>
-  <label for="speciesSearch">Type species name:</label>
-  <input list="speciesOptions" id="speciesSearch" placeholder="Start typing a species..." oninput="searchSpecies()">
+<h2>Species Catalogue (Searchable)</h2>
+<label for="speciesSearch">Type species name:</label>
+<input list="speciesOptions" id="speciesSearch" placeholder="Start typing a species..." oninput="searchSpecies()">
 
-  <datalist id="speciesOptions">
-    <option value="Box Jellyfish">
-    <option value="Sydney Funnel-web Spider">
-    <option value="Asian Giant Hornet">
-    <option value="Yellow-legged Hornet">
-    <option value="Indian Red Scorpion">
-      
-  </datalist>
+<datalist id="speciesOptions">
+  <option value="Box Jellyfish">
+  <option value="Sydney Funnel-web Spider">
+  <option value="Asian Giant Hornet">
+  <option value="Yellow-legged Hornet">
+  <option value="Indian Red Scorpion">
+</datalist>
 
-  <p class="note">Start typing and select a species to auto-fill HLT & COW.</p>
+<p class="note">Start typing and select a species to auto-fill HLT & COW.</p>
 </div>
 
-<script>
-// Catalogue data
-const catalogue = [
-  { name: "Box Jellyfish", hlt: 1, cow: 5 },
-  { name: "Sydney Funnel-web Spider", hlt: 1, cow: 15 },
-  { name: "Asian Giant Hornet", hlt: 59, cow: 120 },
-  { name: "Yellow-legged Hornet", hlt: 100, cow: 180 }
-  { name: "Indian Red Scorpion", hlt: 1, cow: 120 }
-];
-
-// Function to fill HLT & COW from selected species
-function searchSpecies() {
-  const input = document.getElementById("speciesSearch").value.toLowerCase();
-  const match = catalogue.find(species => species.name.toLowerCase() === input);
-  if (match) {
-    document.getElementById("hlt").value = match.hlt;
-    document.getElementById("cow").value = match.cow;
-  }
-}
-</script>
-
-</script>
 <div class="box">
 <h2>PRR Calculator</h2>
 
@@ -126,16 +103,16 @@ function searchSpecies() {
 <div class="result" id="output"></div>
 </div>
 
-  <div class="box">
-  <h2>PRR Scale Explained</h2>
-  <table>
-    <tr><th>PRR</th><th>Meaning</th></tr>
-    <tr><td>1–2</td><td>Low concern, mostly harmless; minor pain.</td></tr>
-    <tr><td>3–4</td><td>Painful; medical attention advised for safety.</td></tr>
-    <tr><td>5–6</td><td>Severe envenomation possible; prompt care recommended.</td></tr>
-    <tr><td>7–8</td><td>Critical; emergency treatment required.</td></tr>
-    <tr><td>9–10</td><td>Rapidly lethal without immediate medical intervention.</td></tr>
-  </table>
+<div class="box">
+<h2>PRR Scale Explained</h2>
+<table>
+<tr><th>PRR</th><th>Meaning</th></tr>
+<tr><td>1–2</td><td>Low concern, mostly harmless; minor pain.</td></tr>
+<tr><td>3–4</td><td>Painful; medical attention advised for safety.</td></tr>
+<tr><td>5–6</td><td>Severe envenomation possible; prompt care recommended.</td></tr>
+<tr><td>7–8</td><td>Critical; emergency treatment required.</td></tr>
+<tr><td>9–10</td><td>Rapidly lethal without immediate medical intervention.</td></tr>
+</table>
 </div>
 
 <div class="box">
@@ -157,14 +134,26 @@ function searchSpecies() {
 </div>
 
 <script>
-function fillSpecies() {
-  const sel = document.getElementById("species").selectedOptions[0];
-  if (!sel) return;
+// Catalogue data
+const catalogue = [
+  { name: "Box Jellyfish", hlt: 1, cow: 5 },
+  { name: "Sydney Funnel-web Spider", hlt: 1, cow: 15 },
+  { name: "Asian Giant Hornet", hlt: 59, cow: 120 },
+  { name: "Yellow-legged Hornet", hlt: 100, cow: 180 },
+  { name: "Indian Red Scorpion", hlt: 1, cow: 120 }
+];
 
-  document.getElementById("hlt").value = sel.dataset.hlt;
-  document.getElementById("cow").value = sel.dataset.cow;
+// Fuzzy search: auto-fill HLT & COW
+function searchSpecies() {
+  const input = document.getElementById("speciesSearch").value.trim().toLowerCase();
+  const match = catalogue.find(species => species.name.toLowerCase().includes(input));
+  if (match) {
+    document.getElementById("hlt").value = match.hlt;
+    document.getElementById("cow").value = match.cow;
+  }
 }
 
+// PRR Calculator
 function calculatePRR() {
   const hlt = parseFloat(document.getElementById("hlt").value);
   const cow = parseFloat(document.getElementById("cow").value);
