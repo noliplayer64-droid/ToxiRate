@@ -3,9 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<img src="IMG_2161.PNG" style="width:140px; display:block; margin:0 auto;">
+
 <title>ToxiRate – Venom Risk Calculator</title>
-<link rel="icon" type="image/png" href="favicon.png">
+
+<!-- Favicon -->
+<link rel="icon" href="IMG_2161.PNG?v=2">
 
 <style>
   body {
@@ -16,6 +18,7 @@
   }
   h1, h2 {
     color: #ffb703;
+    text-align: center;
   }
   .box {
     background: #1a1d33;
@@ -63,23 +66,29 @@
 
 <body>
 
+<!-- Logo -->
+<img src="IMG_2161.PNG" style="width:140px; display:block; margin:0 auto 10px;">
+
 <h1>ToxiRate</h1>
-<p class="note">An educational venom risk mapping and safety tool. To be used if you have just had an encounter with a dangerous animal followed by a venomous bite or sting. Also to be used if you are generally anxious about a toxic animal in your area. If you have any problems with the website, please email this number.no number yet :[</p>
+
+<p class="note" style="text-align:center;">
+An educational venom risk mapping and safety tool.
+</p>
 
 <div class="box">
 <h2>Definitions</h2>
 <ul>
-  <li><strong>HLT (Human Lethality Threshold):</strong> Estimated number of stings or venom units required to cause fatal systemic effects in an average human without medical intervention. Basically how many envemomations will kill an average human.</li>
-  <li><strong>COW (Critical Onset Window):</strong> Minutes before life-threatening symptoms begin. How long you have until systematic failure after the HLT has been met.</li>
-  <li><strong>PRR (Poison Risk Rating):</strong> Combined danger score based on the HLT and COW to measure deadliness in toxins, from 1 (low) to 10 (extreme).</li>
-  <li><strong>   DISCLAIMERS:</strong> If you have any allergies to wasps and other animals, I'm sorry, this app is designed for the average human. The HLT is based on a 25-year old person in good health. I would also like it to be noted that not all venomous animals are catalogued, so I am sorry if you encouter one and are envenomed with no help from this website. Other species that aren't catalogued: It may be because there are no recorded deaths for them. if you know of an unrecorded death,please email me any sense of the HLT and COW.</li>
+  <li><strong>HLT:</strong> Estimated number of envenomations required to be fatal in an average healthy adult.</li>
+  <li><strong>COW:</strong> Minutes before life-threatening systemic effects begin.</li>
+  <li><strong>PRR:</strong> Combined danger score from 1 (low) to 10 (extreme).</li>
 </ul>
 </div>
 
 <div class="box">
-<h2>Species Catalogue (Searchable)</h2>
+<h2>Species Catalogue</h2>
+
 <label for="speciesSearch">Type species name:</label>
-<input list="speciesOptions" id="speciesSearch" placeholder="Start typing a species..." oninput="searchSpecies()">
+<input list="speciesOptions" id="speciesSearch" placeholder="Start typing..." oninput="searchSpecies()">
 
 <datalist id="speciesOptions">
   <option value="Box Jellyfish">
@@ -92,19 +101,19 @@
   <option value="Cone Snail">
   <option value="Blue Ringed Octopus">
   <option value="Lion's Mane Jellyfish">
-  <option value="Saw Scaled Viper">
+  <option value="Saw-scaled Viper">
   <option value="Tiger Rattlesnake">
   <option value="King Cobra">
   <option value="Gaboon Viper">
 </datalist>
 
-<p class="note">Start typing and select a species to auto-fill HLT & COW.</p>
+<p class="note">Selecting a species auto-fills HLT & COW.</p>
 </div>
 
 <div class="box">
 <h2>PRR Calculator</h2>
 
-<label for="hlt">HLT (number of stings):</label>
+<label for="hlt">HLT:</label>
 <input type="number" id="hlt" min="1">
 
 <label for="cow">COW (minutes):</label>
@@ -116,37 +125,18 @@
 </div>
 
 <div class="box">
-<h2>PRR Scale Explained</h2>
+<h2>PRR Scale</h2>
 <table>
 <tr><th>PRR</th><th>Meaning</th></tr>
-<tr><td>0-1–2</td><td>Low concern, mostly harmless; minor pain.</td></tr>
-<tr><td>3–4</td><td>Painful; medical attention advised for safety.</td></tr>
-<tr><td>5–6</td><td>Severe envenomation possible; prompt care recommended.</td></tr>
-<tr><td>7–8</td><td>Critical; emergency treatment required.</td></tr>
-<tr><td>9–10</td><td>Rapidly lethal without immediate medical intervention.</td></tr>
-</table>
-</div>
-
-<div class="box">
-<h2>Research Log</h2>
-<p class="note">Write down species you’ve researched and their PRR values.</p>
-
-<table contenteditable="true">
-<tr>
-  <th>Species</th>
-  <th>HLT</th>
-  <th>COW</th>
-  <th>PRR</th>
-  <th>Notes</th>
-</tr>
-<tr>
-  <td></td><td></td><td></td><td></td><td></td>
-</tr>
+<tr><td>1–2</td><td>Low risk</td></tr>
+<tr><td>3–4</td><td>Moderate risk</td></tr>
+<tr><td>5–6</td><td>Severe</td></tr>
+<tr><td>7–8</td><td>Critical</td></tr>
+<tr><td>9–10</td><td>Extremely lethal</td></tr>
 </table>
 </div>
 
 <script>
-// Catalogue data
 const catalogue = [
   { name: "Box Jellyfish", hlt: 1, cow: 5 },
   { name: "Sydney Funnel-web Spider", hlt: 1, cow: 15 },
@@ -158,40 +148,32 @@ const catalogue = [
   { name: "Cone Snail", hlt: 1, cow: 180 },
   { name: "Blue Ringed Octopus", hlt: 1, cow: 360 },
   { name: "Lion's Mane Jellyfish", hlt: 5, cow: 1440 },
-  { name: "Saw Scaled viper", hlt: 1, cow: 120 },
+  { name: "Saw-scaled Viper", hlt: 1, cow: 120 },
   { name: "Tiger Rattlesnake", hlt: 1, cow: 360 },
-  { name: "Stonefish", hlt: 1, cow: 45 },
   { name: "King Cobra", hlt: 1, cow: 45 },
   { name: "Gaboon Viper", hlt: 1, cow: 60 }
 ];
 
-// Fuzzy search: auto-fill HLT & COW
 function searchSpecies() {
-  const input = document.getElementById("speciesSearch").value.trim().toLowerCase();
-  const match = catalogue.find(species => species.name.toLowerCase().includes(input));
+  const input = document.getElementById("speciesSearch").value.toLowerCase();
+  const match = catalogue.find(s => s.name.toLowerCase() === input);
   if (match) {
     document.getElementById("hlt").value = match.hlt;
     document.getElementById("cow").value = match.cow;
   }
 }
 
-// PRR Calculator
 function calculatePRR() {
   const hlt = parseFloat(document.getElementById("hlt").value);
   const cow = parseFloat(document.getElementById("cow").value);
 
-  if (isNaN(hlt) || isNaN(cow) || hlt <= 0 || cow <= 0) {
-    document.getElementById("output").innerText =
-      "Please enter valid HLT and COW values.";
+  if (!hlt || !cow) {
+    document.getElementById("output").innerText = "Enter valid values.";
     return;
   }
 
-  const severityScore = Math.min(10, 10 / hlt);
-  const speedScore = Math.min(10, 10 / (cow / 5));
-  const prr = Math.round((severityScore + speedScore) / 2);
-
-  document.getElementById("output").innerText =
-    "Poison Risk Rating (PRR): " + prr + " / 10";
+  const prr = Math.round((Math.min(10, 10 / hlt) + Math.min(10, 10 / (cow / 5))) / 2);
+  document.getElementById("output").innerText = `Poison Risk Rating: ${prr}/10`;
 }
 </script>
 
