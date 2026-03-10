@@ -178,6 +178,19 @@ function calculatePRR() {
 
   const prr = Math.round((Math.min(10, 10 / hlt) + Math.min(10, 10 / (cow / 5))) / 2);
   document.getElementById("output").innerText = `Poison Risk Rating: ${prr}/10`;
+  const output = document.getElementById("output");
+
+output.innerText = `Poison Risk Rating: ${prr}/10`;
+
+if (prr <= 3) {
+  output.style.color = "#4caf50";   // green
+} else if (prr <= 6) {
+  output.style.color = "#ffd54f";   // yellow
+} else if (prr <= 8) {
+  output.style.color = "#ff9800";   // orange
+} else {
+  output.style.color = "#f44336";   // red
+}
 }
 </script>
 
