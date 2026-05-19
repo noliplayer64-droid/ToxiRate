@@ -78,10 +78,10 @@ An educational venom risk mapping and safety tool. To be used if you have just h
 <div class="box">
 <h2>Definitions</h2>
 <ul>
-  <li><strong>HLT:</strong> Estimated number of envenomations required to be fatal in an average healthy adult. How many stings or bites are required to kill you. To find measurements for HLT, simply search "how many stings/bites from a (your animal name) is required to kill a human?" and put the number it gives you in.</li>
-  <li><strong>COW:</strong> Minutes before life-threatening systemic effects begin, eventually leading to cardiac arrest or other form of system failure. To find measurements for the COW, simply search "how long does a fatal ammount of (your animal) venom take to kill you?" and put the number you're given in.</li>
-  <li><strong>VRR:</strong> Combined danger score (and system works completely differently to LD50) from 1 (low) to 10 (extreme).The scale works completely differently to LD50 measurements, and it is based on the time it takes for poison to act, not how much venom is required to kill.</li>
-  <li><strong> DISCLAIMERS:</strong> If you have any allergies to wasps and other animals, I'm sorry, this app is designed for the average human. The HLT is based on a 25-year old person in good health. I would also like it to be noted that not all venomous animals are catalogued, so I am sorry if you encouter one and are envenomed with no help from this website. Other species that aren't catalogued: It may be because there are no recorded deaths for them. if you know of an unrecorded death,please email me any sense of the HLT and COW.
+  <li><strong>HLT:</strong> (Human Lethality Threshold) Estimated number of envenomations required to be fatal in an average healthy adult. How many stings or bites are required to kill you. To find measurements for HLT, simply search "how many stings/bites from a (your animal name) is required to kill a human?" and put the number it gives you in.</li>
+  <li><strong>COW:</strong> (Critical Onset Window) Minutes before life-threatening systemic effects begin, eventually leading to cardiac arrest or other form of system failure. To find measurements for the COW, simply search "how long does a fatal ammount of (your animal) venom take to kill you?" and put the number you're given in.</li>
+  <li><strong>VRR:</strong>  (Venom Risk Rating) Combined danger score (and system works completely differently to LD50) from 1 (low) to 10 (extreme).The scale works completely differently to LD50 measurements, and it is based on the time it takes for poison to act, not how much venom is required to kill.</li>
+  <li><strong> DISCLAIMERS:</strong> If you have any allergies to wasps and other animals, Apologies, this app is based on stats for the average human. The HLT is based on a 25-year old person in good health. I would also like it to be noted that not all venomous animals are catalogued, so I am sorry if you encouter one and are envenomed with no help from this website. Other species that aren't catalogued: It may be because there are no recorded deaths for them. if you know of an unrecorded death,please email any sense of the HLT and COW. HLT and COW are based on stats from Google and multiple other sources.
 </ul>
 </div>
 
@@ -91,7 +91,7 @@ An educational venom risk mapping and safety tool. To be used if you have just h
 <label for="speciesSearch">Type species name:</label>
 <input list="speciesOptions" id="speciesSearch" placeholder="Start typing..." oninput="searchSpecies()">
 
-<datalist id="speciesOptions">
+<datalist id="speciesOptions"
   <option value="Box Jellyfish">
   <option value="Sydney Funnel-web Spider">
   <option value="Asian Giant Hornet">
@@ -118,7 +118,7 @@ An educational venom risk mapping and safety tool. To be used if you have just h
 </div>
 
 <div class="box">
-<h2>PRR Calculator</h2>
+<h2>VRR Calculator</h2>
 
 <label for="hlt">HLT:</label>
 <input type="number" id="hlt" min="1">
