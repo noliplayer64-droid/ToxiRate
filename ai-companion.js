@@ -1,197 +1,260 @@
 // ai-companion.js
-// ToxiRate AI companion: improved local rule-based assistant with optional OpenAI integration via sessionStorage.
-// Replaces previous simple triage-only script with a catalogue-aware assistant, settings UI, and safe fallback.
+// Fully local AI-like assistant for ToxiRate — OpenAI integration removed.
+// Features:
+// - Fuzzy species matching and synonyms
+// - Conversation history (sessionStorage)
+// - Quick actions (Calculate PRR, Show species details, Emergency escalation)
+// - Safety-first rules and prominent emergency banner when high-risk symptoms detected
+// - Typing animation for bot replies and structured, copyable advice
+// - Accessible and keyboard-friendly interactions
 
 (function(){
-  // Utility: escape HTML
-  function esc(s){ return String(s||"").replace(/&/g,'&amp;').replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  // --- Utilities -----------------------------------------------------------
+  function esc(s){ return String(s||"").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  // Try to use catalogue from index.html
-  const catalogueData = (window.catalogue && Array.isArray(window.catalogue)) ? window.catalogue : [];
+  function nowISO(){ return new Date().toISOString(); }
 
-  // Compute PRR using the site's formula
-  function computePRR(hlt, cow){
-    hlt = Number(hlt) || 1;
-    cow = Number(cow) || 1;
-    return Math.round((Math.min(10, 10 / hlt) + Math.min(10, 10 / (cow / 5))) / 2);
+  // Simple Levenshtein distance for fuzzy matching
+  function levenshtein(a, b){
+    if(a === b) return 0;
+    const al = a.length, bl = b.length;
+    if(al === 0) return bl;
+    if(bl === 0) return al;
+    const matrix = Array.from({length: al+1}, () => Array(bl+1).fill(0));
+    for(let i=0;i<=al;i++) matrix[i][0] = i;
+    for(let j=0;j<=bl;j++) matrix[0][j] = j;
+    for(let i=1;i<=al;i++){
+      for(let j=1;j<=bl;j++){
+        const cost = a[i-1] === b[j-1] ? 0 : 1;
+        matrix[i][j] = Math.min(
+          matrix[i-1][j] + 1,
+          matrix[i][j-1] + 1,
+          matrix[i-1][j-1] + cost
+        );
+      }
+    }
+    return matrix[al][bl];
   }
 
-  function findSpecies(query){
-    if (!query) return null;
-    const q = query.toLowerCase().trim();
-    let match = catalogueData.find(s => s.name.toLowerCase() === q);
-    if (match) return match;
-    match = catalogueData.find(s => s.name.toLowerCase().includes(q));
-    if (match) return match;
-    const tokens = q.split(/\s+/).filter(Boolean);
-    for (const t of tokens){
-      match = catalogueData.find(s => s.name.toLowerCase().includes(t));
-      if (match) return match;
+  function fuzzyFind(list, getter, q, maxDistance=4){
+    q = String(q||"").toLowerCase().trim();
+    if(!q) return null;
+    // exact
+    for(const item of list){ if(getter(item).toLowerCase() === q) return {item,score:0}; }
+    // contains
+    for(const item of list){ if(getter(item).toLowerCase().includes(q)) return {item,score:1}; }
+    // best levensthein
+    let best = null;
+    for(const item of list){
+      const s = levenshtein(getter(item).toLowerCase(), q);
+      if(best === null || s < best.score){ best = {item,score:s}; }
     }
+    if(best && best.score <= maxDistance) return best;
     return null;
   }
 
-  // Local answer generator
-  function localAnswer(input){
-    const out = [];
-    const lowered = input.toLowerCase();
+  // Typing effect: reveals text in element with small delay between chunks
+  async function typeTo(el, text, opts){
+    opts = opts||{}; const delay = opts.delay||12; const chunk = opts.chunk||4;
+    el.innerHTML = '';
+    for(let i=0;i<text.length;i+=chunk){
+      el.innerHTML += esc(text.slice(i, i+chunk));
+      el.scrollIntoView({behavior:'smooth', block:'nearest'});
+      await new Promise(r=>setTimeout(r, delay));
+    }
+  }
 
+  // --- Catalogue binding ---------------------------------------------------
+  const catalogue = (window.catalogue && Array.isArray(window.catalogue)) ? window.catalogue : [];
+  // build small synonyms map (could be expanded)
+  const synonyms = {
+    'box jelly': 'Box Jellyfish', 'box jellyfish': 'Box Jellyfish',
+    'blue ringed': 'Blue Ringed Octopus', 'blue-ringed': 'Blue Ringed Octopus',
+    'cone': 'Cone Snail', 'deathstalker': 'Deathstalker Scorpion'
+  };
+
+  function findSpecies(q){
+    if(!q) return null;
+    const s = synonyms[q.toLowerCase().trim()];
+    if(s){
+      const exact = catalogue.find(x => x.name === s); if(exact) return exact;
+    }
+    const f = fuzzyFind(catalogue, o => o.name, q, 5);
+    return f ? f.item : null;
+  }
+
+  // --- PRR calculation and safety rules -----------------------------------
+  function computePRR(hlt, cow){
+    hlt = Number(hlt) || 1; cow = Number(cow) || 1;
+    return Math.round((Math.min(10, 10 / hlt) + Math.min(10, 10 / (cow / 5))) / 2);
+  }
+
+  const emergencyTriggers = [ 'difficulty breathing', 'not breathing', 'loss of consciousness', 'unconscious', 'collapse', 'severe bleed', 'severe bleeding', 'shock', 'cardiac arrest' ];
+  const urgentKeywords = [ 'breath', 'difficulty', 'collapse', 'unconscious', 'severe', 'seizure', 'convulsion', 'bleed', 'breathing' ];
+
+  function assessUrgency(text){
+    const t = (text||'').toLowerCase();
+    for(const phrase of emergencyTriggers) if(t.includes(phrase)) return 'emergency';
+    for(const k of urgentKeywords) if(t.includes(k)) return 'urgent';
+    return 'normal';
+  }
+
+  // --- Conversation history (sessionStorage) ------------------------------
+  const STORAGE_KEY = 'toxi_chat_history_v1';
+  function loadHistory(){ try{ return JSON.parse(sessionStorage.getItem(STORAGE_KEY) || '[]'); } catch(e){ return []; } }
+  function saveHistory(hist){ sessionStorage.setItem(STORAGE_KEY, JSON.stringify(hist||[])); }
+
+  function appendMessage(role, content){
+    const hist = loadHistory();
+    hist.push({ role, content, ts: nowISO() });
+    saveHistory(hist);
+  }
+
+  // --- UI helpers ---------------------------------------------------------
+  function createBubble(role, text){
+    const div = document.createElement('div');
+    div.className = 'bubble ' + (role === 'user' ? 'user' : 'bot');
+    div.setAttribute('data-role', role);
+    div.innerHTML = text.replace(/\n/g,'<br>');
+    return div;
+  }
+
+  function showEmergencyBanner(level){
+    removeEmergencyBanner();
+    const chatBox = document.getElementById('chatHistory');
+    if(!chatBox) return;
+    const banner = document.createElement('div');
+    banner.id = 'emBanner';
+    banner.style.background = 'linear-gradient(90deg, #b71c1c, #ff5722)';
+    banner.style.color = '#fff';
+    banner.style.padding = '10px';
+    banner.style.borderRadius = '8px';
+    banner.style.margin = '8px 0';
+    banner.innerHTML = `<strong style="font-size:1.05rem">${level === 'emergency' ? 'CALL EMERGENCY NOW' : 'URGENT — SEEK MEDICAL HELP'}</strong><div style="font-size:0.95rem;margin-top:6px">If breathing or consciousness is affected, call your local emergency number immediately. Provide first aid and do not delay.</div>`;
+    chatBox.prepend(banner);
+  }
+
+  function removeEmergencyBanner(){ const b = document.getElementById('emBanner'); if(b) b.remove(); }
+
+  // --- Main assistant logic -----------------------------------------------
+  function generateLocalReply(input){
+    const trimmed = (input||'').trim();
+    const urgency = assessUrgency(trimmed);
+    if(urgency === 'emergency') return { text: 'EMERGENCY: Symptoms you described require immediate medical attention. CALL EMERGENCY SERVICES NOW. Do not wait. While help comes, ensure airway, breathing, and circulation are supported. Avoid giving anything by mouth if unconscious.', emergency:true };
     // species lookup
-    const species = findSpecies(input);
-    if (species){
+    const species = findSpecies(trimmed);
+    if(species){
       const prr = computePRR(species.hlt, species.cow);
-      out.push(`${species.name} — HLT: ${species.hlt}, COW: ${species.cow} minutes.`);
-      out.push(`Estimated Poison Risk Rating: ${prr}/10.`);
-      out.push('Advice: This is educational only. If bitten or stung, seek medical attention. Call emergency services if breathing, consciousness, or severe symptoms occur.');
-      return out.join('\n\n');
+      const lines = [];
+      lines.push(`<strong>${esc(species.name)}</strong>`);
+      lines.push(`HLT: <strong>${esc(species.hlt)}</strong> — COW: <strong>${esc(species.cow)} minutes</strong>`);
+      lines.push(`Estimated Poison Risk Rating: <strong>${prr}/10</strong>`);
+      lines.push('Advice: This tool provides educational information only. If bitten or stung, immobilize the affected area (if appropriate), avoid harmful folk remedies, and seek medical care. Call emergency services if breathing, consciousness, or rapid deterioration occurs.');
+      lines.push('<div style="margin-top:8px"><button data-action="calc-prr" class="tiny-btn">Calculate with these values</button> <button data-action="more-info" class="tiny-btn">More species info</button></div>');
+      return { text: lines.join('<br><br>'), emergency: false };
     }
 
     // term explanations
-    if (lowered.includes('hlt')){
-      out.push('HLT (Human Lethality Threshold): estimated number of envenomations likely to be fatal in an average healthy adult. Lower is more dangerous.');
-    }
-    if (lowered.includes('cow')){
-      out.push('COW (Critical Onset Window): estimated minutes before likely fatality after envenomation. Shorter windows indicate more urgent treatment.');
-    }
-    if (lowered.includes('vrr') || lowered.includes('prr') || lowered.includes('risk')){
-      out.push('VRR/PRR is a 0–10 danger score calculated from HLT and COW. Lower HLT and shorter COW raise the rating.');
+    const low = trimmed.toLowerCase();
+    if(low.includes('hlt')) return { text: 'HLT (Human Lethality Threshold) — estimated number of envenomations required to be fatal in an average healthy adult. Lower HLT → higher danger.', emergency:false };
+    if(low.includes('cow')) return { text: 'COW (Critical Onset Window) — minutes before likely fatality after envenomation. Shorter COW → more urgent treatment required.', emergency:false };
+    if(low.includes('vrr') || low.includes('prr') || low.includes('risk')) return { text: 'VRR/PRR is a 0–10 danger score derived from HLT and COW where lower HLT and shorter COW increase the score.', emergency:false };
+
+    // general triage guidance
+    if(low.match(/bite|sting|symptom|numb|swelling|bleed|vomit|breath|dizzy|collapse|shock|seizure/)){
+      return { text: 'If someone is bitten or stung: keep them calm, immobilize the affected limb if appropriate, remove tight clothing/jewelry, monitor breathing. Do NOT cut or attempt to suck out venom. Seek medical attention. Call emergency services if breathing or consciousness is affected.', emergency: urgency === 'urgent' };
     }
 
-    if (lowered.match(/bite|sting|symptom|numb|breath|swelling|shock|collapse/)){
-      out.push('If you or someone else is bitten or stung: keep calm; immobilize the affected area if appropriate; avoid cutting or sucking the wound; seek medical care. Call emergency services if breathing, consciousness, or rapid deterioration occurs.');
-    }
-
-    if (out.length === 0){
-      out.push('I can lookup species from the catalogue (try "Box Jellyfish") and explain HLT, COW, VRR. Ask about a species or a term like "what is HLT".');
-    }
-
-    return out.join('\n\n');
+    // fallback help
+    return { text: 'I can look up species from the catalogue (try typing a species name like "Box Jellyfish"), explain terms (HLT, COW, PRR), or offer first-aid guidance. Ask me a question or say "help".', emergency:false };
   }
 
-  // OpenAI call (optional) — WARNING: exposing keys in client is a risk
-  async function callOpenAI(key, userInput){
-    const endpoint = 'https://api.openai.com/v1/chat/completions';
-    const systemPrompt = `You are the ToxiRate assistant. Use the provided catalogue to answer questions about species HLT, COW, and VRR. Calculate PRR when possible using PRR = round((min(10,10/hlt) + min(10,10/(cow/5)))/2). Always include a medical-safety disclaimer and encourage professional care.`;
-    const catalogueSnippet = JSON.stringify(catalogueData || [], null, 0);
+  // --- Wire to DOM --------------------------------------------------------
+  function initWidget(){
+    const input = document.getElementById('aiInput');
+    const output = document.getElementById('aiOutput'); // hidden offscreen, used by old code; we'll use chatHistory
+    const chat = document.getElementById('chatHistory');
+    if(!input || !chat) return;
 
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: `Catalogue: ${catalogueSnippet}` },
-      { role: 'user', content: userInput }
-    ];
-
-    const body = { model: 'gpt-3.5-turbo', messages, temperature: 0.3, max_tokens: 700 };
-
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify(body)
-    });
-
-    if (!res.ok){
-      const text = await res.text();
-      throw new Error('OpenAI API error: ' + res.status + ' ' + text);
+    // render history
+    const hist = loadHistory();
+    if(hist && hist.length){
+      chat.innerHTML = '';
+      for(const msg of hist){
+        const bubble = createBubble(msg.role, esc(msg.content));
+        chat.appendChild(bubble);
+      }
     }
 
-    const data = await res.json();
-    if (data && data.choices && data.choices[0] && data.choices[0].message) return data.choices[0].message.content;
-    throw new Error('Unexpected OpenAI response');
-  }
+    // handler
+    async function handleQuery(text){
+      if(!text || !text.trim()) return;
+      const userBubble = createBubble('user', esc(text));
+      chat.appendChild(userBubble);
+      appendMessage('user', text);
+      chat.scrollTop = chat.scrollHeight;
 
-  // create settings UI within .ai-box
-  function createSettings(){
-    const aiBox = document.querySelector('.ai-box');
-    if (!aiBox) return;
-    // avoid duplicating
-    if (document.getElementById('tox-settings')) return;
+      // quick local thinking animation
+      const thinking = createBubble('bot', '...'); thinking.style.opacity = '0.6'; chat.appendChild(thinking); chat.scrollTop = chat.scrollHeight;
 
-    const settings = document.createElement('div');
-    settings.id = 'tox-settings';
-    settings.style.marginTop = '10px';
-    settings.style.fontSize = '0.9em';
+      // generate reply
+      const reply = generateLocalReply(text);
+      // remove thinking
+      thinking.remove(); removeEmergencyBanner();
 
-    const row = document.createElement('div');
-    row.style.display = 'flex';
-    row.style.gap = '8px';
-    row.style.alignItems = 'center';
+      if(reply.emergency) showEmergencyBanner('emergency');
+      else if(reply.text && assessUrgency(text) === 'urgent') showEmergencyBanner('urgent');
 
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
-    checkbox.id = 'openaiEnable';
-    checkbox.checked = sessionStorage.getItem('openaiEnabled') === 'true';
+      const botBubble = createBubble('bot', '');
+      chat.appendChild(botBubble);
+      chat.scrollTop = chat.scrollHeight;
 
-    const lbl = document.createElement('label');
-    lbl.htmlFor = 'openaiEnable';
-    lbl.innerText = 'Enable OpenAI (not recommended on public sites)';
+      // type the reply
+      await typeTo(botBubble, reply.text, {delay:10, chunk:6});
+      appendMessage('bot', reply.text);
+      chat.scrollTop = chat.scrollHeight;
 
-    row.appendChild(checkbox);
-    row.appendChild(lbl);
+      // wire quick buttons inside botBubble
+      const calcBtn = botBubble.querySelector('button[data-action="calc-prr"]');
+      if(calcBtn) calcBtn.addEventListener('click', () => {
+        // find numbers in bubble and calculate
+        const sp = text; // if species was the query, use findSpecies
+        const spec = findSpecies(sp);
+        if(spec){ document.getElementById('hlt').value = spec.hlt; document.getElementById('cow').value = spec.cow; calculatePRR(); }
+      });
+      const infoBtn = botBubble.querySelector('button[data-action="more-info"]');
+      if(infoBtn) infoBtn.addEventListener('click', () => {
+        const spec = findSpecies(text);
+        if(spec){
+          const details = `Species: ${spec.name}\nHLT: ${spec.hlt}\nCOW: ${spec.cow} minutes\nPRR: ${computePRR(spec.hlt, spec.cow)}/10`;
+          alert(details);
+        }
+      });
+    }
 
-    const keyInput = document.createElement('input');
-    keyInput.type = 'password';
-    keyInput.id = 'openaiKey';
-    keyInput.placeholder = 'OpenAI API key (session only)';
-    keyInput.style.width = '100%';
-    keyInput.style.marginTop = '6px';
-    keyInput.value = sessionStorage.getItem('openaiKey') || '';
-
-    const saveBtn = document.createElement('button');
-    saveBtn.innerText = 'Save session settings';
-    saveBtn.style.marginTop = '6px';
-    saveBtn.onclick = function(){
-      sessionStorage.setItem('openaiEnabled', checkbox.checked ? 'true' : 'false');
-      sessionStorage.setItem('openaiKey', keyInput.value || '');
-      const out = document.getElementById('aiOutput');
-      if (out) out.innerText = 'Settings saved for this browser session.';
+    window.askToxiAI = function(){
+      const text = input.value.trim();
+      if(!text){ input.focus(); return; }
+      handleQuery(text);
+      input.value = '';
+      input.focus();
     };
 
-    const note = document.createElement('div');
-    note.style.color = '#bbb';
-    note.style.marginTop = '6px';
-    note.innerText = 'If enabled, your question and the catalogue will be sent to OpenAI from your browser. Do NOT paste a key on public or shared machines.';
+    // keyboard accessibility: Enter key handled on input by inline onkeydown in index.html
 
-    settings.appendChild(row);
-    settings.appendChild(keyInput);
-    settings.appendChild(saveBtn);
-    settings.appendChild(note);
+    // clear history UI button
+    const clearBtn = document.getElementById('clearChat');
+    if(clearBtn){ clearBtn.addEventListener('click', () => { sessionStorage.removeItem(STORAGE_KEY); chat.innerHTML=''; removeEmergencyBanner(); }); }
 
-    aiBox.appendChild(settings);
+    // small helper: suggest species on focus
+    input.addEventListener('focus', ()=>{
+      // show top 5 species suggestions as placeholder (non-intrusive)
+      const top = catalogue.slice(0,6).map(s=>s.name).join(', ');
+      input.setAttribute('placeholder', 'Try: ' + top);
+    });
   }
 
-  // global handler used by index.html
-  window.askToxiAI = async function(){
-    const inputEl = document.getElementById('aiInput');
-    const outputEl = document.getElementById('aiOutput');
-    if (!inputEl || !outputEl){
-      alert('AI UI not found');
-      return;
-    }
-    const text = inputEl.value.trim();
-    if (!text){ outputEl.innerText = 'Type a question first.'; return; }
-
-    outputEl.style.fontStyle = 'normal';
-    outputEl.innerText = 'Thinking...';
-
-    const enabled = sessionStorage.getItem('openaiEnabled') === 'true';
-    const key = sessionStorage.getItem('openaiKey') || '';
-
-    try{
-      if (enabled && key){
-        const reply = await callOpenAI(key, text);
-        outputEl.innerText = reply;
-      } else {
-        const reply = localAnswer(text);
-        outputEl.innerText = reply;
-      }
-    } catch(err){
-      console.error(err);
-      outputEl.innerText = 'Error: ' + err.message + '\n\nFalling back to local assistant.';
-      try{ outputEl.innerText += '\n\n' + localAnswer(text); } catch(e){}
-    }
-
-    inputEl.value = '';
-  };
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', createSettings); else createSettings();
+  // initialize on DOM ready
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initWidget); else initWidget();
 
 })();
