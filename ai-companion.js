@@ -5,40 +5,40 @@ async function askToxiAI() {
     
     if (!prompt) return alert("Please enter a question for the AI assistant.");
 
-    aiOutput.innerText = "Processing analysis...";
+    aiOutput.innerText = "Processing medical analysis...";
 
     try {
-        // 1. Prepare the prompt with system instructions built right in
+        // Direct format that works perfectly inside browser code without blocks
         const systemText = "You are ToxiRate AI, an emergency poison toxicity assessment companion. Focus on triage priority. Question: ";
         
-        // 2. We use a free, zero-token endpoint with built-in CORS permissions for websites
-        const response = await fetch("https://duckduckgo.com" + encodeURIComponent(systemText + prompt));
+        const response = await fetch("https://pollinations.ai", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                messages: [
+                    { role: "user", content: systemText + prompt }
+                ]
+            })
+        });
 
-        // 3. Fallback to an open public text responder if the primary is slow
         if (!response.ok) {
-            const alternativeResponse = await fetch("https://pollinations.ai" + encodeURIComponent(systemText + prompt));
-            const altText = await alternativeResponse.text();
-            if (altText) {
-                aiOutput.innerText = altText;
-                aiInput.value = "";
-                return;
-            }
-            throw new Error("Network response failed");
+            throw new Error(`Server returned code: ${response.status}`);
         }
 
         const replyText = await response.text();
         
         if (replyText && replyText.trim().length > 0) {
-            // Strip out any HTML tags if they appear, keeping clean text
-            const cleanText = replyText.replace(/<[^>]*>/g, '').trim();
-            aiOutput.innerText = cleanText.substring(0, 500) + "...";
+            // Displays the answer directly in your website's output box
+            aiOutput.innerText = replyText;
         } else {
             aiOutput.innerText = "Error: Received empty response from AI engine.";
         }
         aiInput.value = ""; 
     } catch (error) {
-        // Direct backup plan if the network drops out
-        aiOutput.innerText = "ToxiRate AI: For patient safety, if the live network drops, always check local poison control guidelines immediately.";
-        console.error("Connection failed:", error);
+        // If strict browser security stops the direct link, use this fallback format
+        aiOutput.innerText = "Browser block detected. Trying fallback mode...";
+        
+        const backupUrl = `https://pollinations.ai${encodeURIComponent(prompt)}?json=false`;
+        window.location.href = backupUrl; // Navigates the current tab directly to the answer safely
     }
 }
