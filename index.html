@@ -215,6 +215,15 @@ if (prr <= 3) {
 }
 }
 </script>
+  <!-- ToxiRate Chat Widget Interface -->
+<div class="ai-box" style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
+    <h3>ToxiRate AI Companion</h3>
+    <input type="text" id="aiInput" placeholder="Ask about HLT, COW, or toxicity rules..." style="width: 75%; padding: 8px;">
+    <button onclick="askToxiAI()" style="padding: 8px 12px; cursor: pointer;">Ask AI</button>
+    <div id="aiOutput" style="margin-top: 15px; font-style: italic; white-space: pre-wrap;">AI companion ready...</div>
+</div>
+
+<script src="ai-companion.js"></script>
 
 </body>
 </html>
