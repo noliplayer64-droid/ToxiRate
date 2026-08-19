@@ -1,0 +1,6 @@
+.env
+node_modules/
+# Do not commit OpenAI keys
+*.key
+*.pem
+.env.local

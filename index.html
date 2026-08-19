@@ -10,151 +10,158 @@
 <link rel="icon" href="images/IMG_2161.PNG">
 
 <style>
+  :root{
+    --bg:#0f1220;
+    --card:#131427;
+    --accent:#ffb703;
+    --muted:#9aa0b2;
+    --success:#4caf50;
+    --warning:#ffd54f;
+    --danger:#f44336;
+    --glass: rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box}
   body {
-    font-family: Arial, sans-serif;
-    background: #0f1220;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,var(--bg),#0b0e18 120%);
     color: #eaeaf0;
-    padding: 20px;
+    padding: 28px;
+    margin:0;
   }
-  h1, h2 {
-    color: #ffb703;
-    text-align: center;
-  }
-  .box {
-    background: #1a1d33;
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-  }
-  label {
-    display: block;
-    margin-top: 10px;
-  }
-  input, button {
-    margin-top: 5px;
-    padding: 6px;
-    width: 100%;
-    max-width: 300px;
-  }
-  button {
-    margin-top: 15px;
-    background: #ffb703;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-  }
-  .result {
-    font-size: 1.2em;
-    margin-top: 10px;
-    color: #90dbf4;
-  }
-  table {
-    border-collapse: collapse;
-    margin-top: 10px;
-    width: 100%;
-  }
-  th, td {
-    border: 1px solid #555;
-    padding: 6px 10px;
-  }
-  .note {
-    font-size: 0.9em;
-    color: #bbb;
-  }
+  .container{max-width:980px;margin:0 auto}
+  header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+  header img{width:64px;height:64px;border-radius:8px;object-fit:cover}
+  h1{color:var(--accent);margin:0}
+  p.lead{color:var(--muted);margin-top:6px}
+
+  .grid{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+
+  .card{background:linear-gradient(180deg,var(--card),#0e1220);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  label{display:block;font-weight:600;margin-top:10px;color:#dfe6f4}
+  input[type="text"], input[type="number"], select, textarea{margin-top:6px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;width:100%}
+  button.primary{background:var(--accent);color:#071026;border:none;padding:10px 14px;border-radius:9px;font-weight:700;cursor:pointer}
+  button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 10px;border-radius:8px;color:var(--muted)}
+
+  .result{font-size:1.1rem;margin-top:10px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02)}
+  table{width:100%;border-collapse:collapse;margin-top:10px}
+  th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
+  .note{font-size:0.9rem;color:var(--muted)}
+
+  /* AI chat */
+  .ai-box{display:flex;flex-direction:column;gap:8px}
+  #chatHistory{max-height:360px;overflow:auto;padding:8px;border-radius:8px;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.06));}
+  .bubble{padding:10px;border-radius:10px;margin:6px 0;max-width:90%}
+  .user{background:rgba(11,24,40,0.7);align-self:flex-end}
+  .bot{background:rgba(255,255,255,0.03);align-self:flex-start;color:var(--muted)}
+  .ts{font-size:0.75rem;color:var(--muted);margin-top:6px}
+
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
-
 <body>
+<div class="container">
+  <header>
+    <img src="IMG_2161.PNG" alt="ToxiRate logo">
+    <div>
+      <h1>ToxiRate</h1>
+      <p class="lead">Educational venom risk mapping & safety tool — use responsibly.</p>
+    </div>
+  </header>
 
-<!-- Logo -->
-<img src="IMG_2161.PNG" style="width:140px; display:block; margin:0 auto 10px;">
+  <div class="grid">
+    <main>
+      <section class="card">
+        <h2>Definitions</h2>
+        <p class="note">HLT = Human Lethality Threshold, COW = Critical Onset Window (minutes), VRR/PRR = Venom/Poison Risk Rating (0–10).</p>
+        <ul>
+          <li><strong>HLT:</strong> Estimated number of envenomations required to be fatal in an average healthy adult.</li>
+          <li><strong>COW:</strong> Minutes before likely fatality after envenomation — shorter windows need urgent care.</li>
+          <li><strong>VRR/PRR:</strong> Combined danger score (0–10) derived from HLT and COW. Lower HLT and shorter COW raise the score.</li>
+        </ul>
+      </section>
 
-<h1>ToxiRate</h1>
+      <section class="card" style="margin-top:14px">
+        <h2>Species Catalogue</h2>
+        <label for="speciesSearch">Search species</label>
+        <input list="speciesOptions" id="speciesSearch" placeholder="Start typing species name..." aria-label="species search" oninput="searchSpecies()">
+        <datalist id="speciesOptions">
+          <option value="Box Jellyfish"></option>
+          <option value="Sydney Funnel-web Spider"></option>
+          <option value="Asian Giant Hornet"></option>
+          <option value="Yellow-legged Hornet"></option>
+          <option value="Indian Red Scorpion"></option>
+          <option value="Inland Taipan"></option>
+          <option value="Deathstalker Scorpion"></option>
+          <option value="Cone Snail"></option>
+          <option value="Blue Ringed Octopus"></option>
+          <option value="Lion's Mane Jellyfish"></option>
+          <option value="Saw-scaled Viper"></option>
+          <option value="Tiger Rattlesnake"></option>
+          <option value="King Cobra"></option>
+          <option value="Gaboon Viper"></option>
+          <option value="Slow Loris"></option>
+          <option value="Diamondback Rattlesnake"></option>
+          <option value="Brazilian Wandering Spider"></option>
+          <option value="Indian Cobra"></option>
+          <option value="Common Krait"></option>
+          <option value="Fat-tailed Scorpion"></option>
+          <option value="Coral Snake"></option>
+        </datalist>
+        <p class="note">Selecting a species will auto-fill HLT & COW in the calculator.</p>
+      </section>
 
-<p class="note" style="text-align:center;">
-An educational venom risk mapping and safety tool. To be used if you have just had an encounter with a dangerous animal followed by a venomous bite or sting. Also to be used if you are generally anxious about a toxic animal in your area. If you have any problems with the website, please copy this address and email me (CEO): raptordroid375@gmail.com
-</p>
+      <section class="card" style="margin-top:14px">
+        <h2>VRR Calculator</h2>
+        <label for="hlt">HLT</label>
+        <input type="number" id="hlt" min="1" value="1">
+        <label for="cow">COW (minutes)</label>
+        <input type="number" id="cow" min="1" value="60">
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="primary" onclick="calculatePRR()">Calculate VRR</button>
+          <button class="ghost" onclick="resetCalculator()">Reset</button>
+        </div>
+        <div class="result" id="output" role="status" aria-live="polite"></div>
 
-<div class="box">
-<h2>Definitions</h2>
-<ul>
-  <li><strong>HLT:</strong> (Human Lethality Threshold) Estimated number of envenomations required to be fatal in an average healthy adult. How many stings or bites are required to kill you. To find measurements for HLT, simply search "how many stings/bites from a (your animal name) is required to kill a human?" and put the number it gives you in.</li>
-  <li><strong>COW:</strong> (Critical Onset Window) Minutes before likely fatality. To find measurements for the COW, simply search "how long does a fatal ammount of (your animal) venom take to kill you?" and put the number you're given in.</li>
-  <li><strong>VRR:</strong>  (Venom Risk Rating) Combined danger score (and system works completely differently to LD50) from 1 (low) to 10 (extreme).The scale works completely differently to LD50 measurements, and it is based on the time it takes for poison to act, not how much venom is required to kill.</li>
-  <li><strong>DISCLAIMERS:</strong> If you have any allergies to wasps and other animals, Apologies, this app is based on stats for the average human. The HLT is based on a 25-year old person in good health. I would also like it to be noted that not all venomous animals are catalogued, so I am sorry if you encouter one and are envenomed with no help from this website. Other species that aren't catalogued: It may be because there are no recorded deaths for them. if you know of an unrecorded death,please email any sense of the HLT and COW. HLT and COW are based on stats from Google and multiple other sources.
-  <li></strong>PLEASE REMEMBER:</strong> If you are attacked by an animal you deem dangerous, look it up before coming here. you may be mistaken of what it is, as many milksnakes look like the extremely venomous coral snake for example. check what you are bitten by, then come here and see how dangerous the animal is. if you had a friend with you ask them for help. Some of this website is based on speculation, so please check sources if you are in danger. Research any animals you are nervous about encountering. Contact us if you would like an animal added.</li>
+        <h3 style="margin-top:14px">VRR Scale</h3>
+        <table>
+          <tr><th>VRR</th><th>Meaning</th></tr>
+          <tr><td>0–2</td><td>Low risk — monitor; seek care per HLT or local advice.</td></tr>
+          <tr><td>3–4</td><td>Moderate — consider hospital evaluation.</td></tr>
+          <tr><td>5–6</td><td>Severe — hospital care advised.</td></tr>
+          <tr><td>7–8</td><td>Highly severe — urgent hospital care required.</td></tr>
+          <tr><td>9–10</td><td>Extremely lethal — emergency services immediately.</td></tr>
+        </table>
+      </section>
 
-</ul>
+    </main>
+
+    <aside>
+      <section class="card ai-box">
+        <h3>ToxiRate AI Companion</h3>
+        <div id="chatHistory" aria-live="polite"></div>
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <input type="text" id="aiInput" placeholder="Ask about HLT, COW, species, or first aid..." style="flex:1;padding:10px;border-radius:8px" onkeydown="if(event.key==='Enter'){event.preventDefault();askToxiAI();}">
+          <button class="primary" onclick="askToxiAI()">Ask</button>
+        </div>
+        <div id="aiOutput" style="display:none;margin-top:8px"></div>
+        <div style="margin-top:10px">
+          <button class="ghost" id="clearChat">Clear</button>
+          <a class="ghost" href="https://venom-aid-hornet.base44.app" target="_blank" rel="noopener noreferrer" style="margin-left:6px">Visit Venomaid</a>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h4>Notes & Safety</h4>
+        <p class="note">This tool is educational only and is not a substitute for professional medical advice. If symptoms are severe (difficulty breathing, loss of consciousness, severe bleeding, shock), call emergency services immediately.</p>
+      </section>
+    </aside>
+  </div>
+
+  <footer style="margin-top:22px;text-align:center;color:var(--muted)">Made with care — keep keys off public pages. Ask to add a secure server proxy for OpenAI integration.</footer>
 </div>
-
-<div class="box">
-<h2>Species Catalogue</h2>
-
-<label for="speciesSearch">Type species name:</label>
-<input list="speciesOptions" id="speciesSearch" placeholder="Start typing..." oninput="searchSpecies()">
-
-<datalist id="speciesOptions"
-  <option value="Box Jellyfish">
-  <option value="Sydney Funnel-web Spider">
-  <option value="Asian Giant Hornet">
-  <option value="Yellow-legged Hornet">
-  <option value="Indian Red Scorpion">
-  <option value="Inland Taipan">
-  <option value="Deathstalker Scorpion">
-  <option value="Cone Snail">
-  <option value="Blue Ringed Octopus">
-  <option value="Lion's Mane Jellyfish">
-  <option value="Saw-scaled Viper">
-  <option value="Tiger Rattlesnake">
-  <option value="King Cobra">
-  <option value="Gaboon Viper">
-  <option value="Slow Loris">
-  <option value="Diamondback Rattlesnake">
-  <option value="Brazilian Wandering Spider">
-  <option value="Indian Cobra">
-  <option value="Common Krait">
-  <option value="Fat-tailed Scorpion">
-  <option value="Coral Snake">
-</datalist>
-
-<p class="note">Selecting a species auto-fills HLT & COW.</p>
-</div>
-
-<div class="box">
-<h2>VRR Calculator</h2>
-
-<label for="hlt">HLT:</label>
-<input type="number" id="hlt" min="1">
-
-<label for="cow">COW (minutes):</label>
-<input type="number" id="cow" min="1">
-
-<button onclick="calculatePRR()">Calculate VRR</button>
-
-<div class="result" id="output"></div>
-</div>
-
-
-
-<div class="box">
-<h2>VRR Scale</h2>
-<table>
-<tr><th>VRR</th><th>Meaning</th></tr>
-<tr><td>0–1–2</td><td>Low risk, refer to HLT for whether to see a doctor.</td></tr>
-<tr><td>3–4</td><td>Moderate risk, wise head to a hospital, treatment may be required</td></tr>
-<tr><<tr><td>5-6</td><td> Severe risk, head to a hospital,  treatment highly suggested</td></tr>
-<tr><<tr><td>7-8</td><td>  Highly Severe risk, get to a hospital swiftly, treatment urgently required</td></tr>
-<tr><td>9–10</td><td>Extremely lethal, head to hospital immediately. Immediate treatment required. Call an ambulance swiftly.</td></tr>
-</table>
-</div>
-
-<li><strong>Ask Hornet AI</strong></li>
-  <li> Ask Hornet, our trusty bot, over on Venomaid AI </li>
-  <a href="https://venom-aid-hornet.base44.app" class="button-link">Visit Venomaid</a>
-  <li> Please note that due to lack of time and skill Venom Aid AI was made using AI components. This may be changed in future.</li>
-
 
 <script>
+// keep catalogue inline for ai-companion usage
 const catalogue = [
   { name: "Box Jellyfish", hlt: 1, cow: 5 },
   { name: "Sydney Funnel-web Spider", hlt: 1, cow: 15 },
@@ -177,7 +184,6 @@ const catalogue = [
   { name: "Common Krait", hlt: 1, cow: 360 },
   { name: "Fat-tailed Scorpion", hlt: 1, cow: 270 },
   { name: "Coral Snake", hlt: 1, cow: 180 }
-  
 ];
 
 function searchSpecies() {
@@ -193,38 +199,55 @@ function calculatePRR() {
   const hlt = parseFloat(document.getElementById("hlt").value);
   const cow = parseFloat(document.getElementById("cow").value);
 
+  const outputEl = document.getElementById("output");
   if (!hlt || !cow) {
-    document.getElementById("output").innerText = "Enter valid values.";
+    outputEl.innerText = "Enter valid values.";
+    outputEl.style.color = '';
     return;
   }
 
   const prr = Math.round((Math.min(10, 10 / hlt) + Math.min(10, 10 / (cow / 5))) / 2);
-  document.getElementById("output").innerText = `Poison Risk Rating: ${prr}/10`;
-  const output = document.getElementById("output");
+  outputEl.innerText = `Poison Risk Rating: ${prr}/10`;
 
-output.innerText = `Poison Risk Rating: ${prr}/10`;
+  if (prr <= 3) {
+    outputEl.style.color = "var(--success)";
+  } else if (prr <= 6) {
+    outputEl.style.color = "var(--warning)";
+  } else if (prr <= 8) {
+    outputEl.style.color = "#ff9800";
+  } else {
+    outputEl.style.color = "var(--danger)";
+  }
+}
 
-if (prr <= 3) {
-  output.style.color = "#4caf50";   // green
-} else if (prr <= 6) {
-  output.style.color = "#ffd54f";   // yellow
-} else if (prr <= 8) {
-  output.style.color = "#ff9800";   // orange
-} else {
-  output.style.color = "#f44336";   // red
+function resetCalculator(){
+  document.getElementById('hlt').value = 1;
+  document.getElementById('cow').value = 60;
+  document.getElementById('output').innerText = '';
 }
-}
+
+// small connection to ai-companion: when aiOutput changes, append to chat history
+(function(){
+  const aiOutput = document.getElementById('aiOutput');
+  const chatHistory = document.getElementById('chatHistory');
+  const clearBtn = document.getElementById('clearChat');
+  clearBtn.onclick = () => { chatHistory.innerHTML = ''; sessionStorage.removeItem('openaiKey'); sessionStorage.removeItem('openaiEnabled'); };
+
+  const obs = new MutationObserver(m => {
+    const text = aiOutput.innerText || ''; if (!text) return;
+    const user = document.getElementById('aiInput').value || '(your question)';
+    const userBubble = document.createElement('div'); userBubble.className = 'bubble user'; userBubble.innerText = user;
+    const botBubble = document.createElement('div'); botBubble.className = 'bubble bot'; botBubble.innerHTML = text.replace(/\n/g,'<br>');
+    const ts = document.createElement('div'); ts.className = 'ts'; ts.innerText = new Date().toLocaleString();
+    chatHistory.appendChild(userBubble);
+    chatHistory.appendChild(botBubble);
+    chatHistory.appendChild(ts);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+  });
+  obs.observe(aiOutput, {childList:true,characterData:true,subtree:true});
+})();
 </script>
-  <!-- ToxiRate Chat Widget Interface -->
-<div class="ai-box" style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-    <h3>ToxiRate AI Companion</h3>
-    <input type="text" id="aiInput" placeholder="Ask about HLT, COW, or toxicity rules..." style="width: 75%; padding: 8px;">
-    <button onclick="askToxiAI()" style="padding: 8px 12px; cursor: pointer;">Ask AI</button>
-    <div id="aiOutput" style="margin-top: 15px; font-style: italic; white-space: pre-wrap;">AI companion ready...</div>
-</div>
 
 <script src="ai-companion.js"></script>
-
-
 </body>
 </html>
