@@ -1,51 +1,40 @@
-// Paste your GitHub Classic Token (ghp_...) inside the quotes below
-const GITHUB_AI_TOKEN = "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";
-
 async function askToxiAI() {
     const aiInput = document.getElementById('aiInput');
     const aiOutput = document.getElementById('aiOutput');
     const prompt = aiInput.value.trim();
     
     if (!prompt) return alert("Please enter a question for the AI assistant.");
-    if (GITHUB_AI_TOKEN.includes("PASTE_YOUR")) return alert("Please configure your GitHub Token inside ai-companion.js.");
 
     aiOutput.innerText = "Processing analysis...";
 
     try {
-        // We wrap the URL in corsproxy.io to stop the browser from blocking it
-        const targetUrl = "https://azure.com";
-        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
-
-        const response = await fetch(proxyUrl, {
+        // We use a free, tokenless AI endpoint designed for browser applications
+        const response = await fetch(`https://pollinations.ai`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${GITHUB_AI_TOKEN}`
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                model: "gpt-4o-mini", // Calls OpenAI's model safely
                 messages: [
                     { 
                         role: "system", 
-                        content: "You are an AI medical companion built into ToxiRate, an emergency poison toxicity assessment application. Focus answers on triage priority and patient safety metrics." 
+                        content: "You are an AI medical companion built into ToxiRate, an emergency poison toxicity assessment application. Focus answers on triage priority and safety metrics." 
                     },
                     { role: "user", content: prompt }
-                ]
+                ],
+                seed: 42,
+                jsonMode: false
             })
         });
 
-        const data = await response.json();
+        const replyText = await response.text();
         
-        if (data.choices && data.choices[0]) {
-            aiOutput.innerText = data.choices[0].message.content;
-        } else if (data.error) {
-            aiOutput.innerText = "API Error: " + data.error.message;
+        if (replyText) {
+            aiOutput.innerText = replyText;
         } else {
-            aiOutput.innerText = "Error: Check token or daily rate limits.";
+            aiOutput.innerText = "Error: Received empty response from AI engine.";
         }
         aiInput.value = ""; 
     } catch (error) {
-        aiOutput.innerText = "Error: Could not connect to the AI engine.";
+        aiOutput.innerText = "Error: Could not connect to the open AI network.";
         console.error("Connection failed:", error);
     }
 }
