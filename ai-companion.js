@@ -1,44 +1,40 @@
-async function askToxiAI() {
+function askToxiAI() {
     const aiInput = document.getElementById('aiInput');
     const aiOutput = document.getElementById('aiOutput');
-    const prompt = aiInput.value.trim();
+    const prompt = aiInput.value.toLowerCase().trim();
     
-    if (!prompt) return alert("Please enter a question for the AI assistant.");
+    if (!prompt) return alert("Please type your triage question.");
 
-    aiOutput.innerText = "Processing medical analysis...";
+    aiOutput.innerText = "Analyzing local metrics matrix...";
 
-    try {
-        // Direct format that works perfectly inside browser code without blocks
-        const systemText = "You are ToxiRate AI, an emergency poison toxicity assessment companion. Focus on triage priority. Question: ";
-        
-        const response = await fetch("https://pollinations.ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                messages: [
-                    { role: "user", content: systemText + prompt }
-                ]
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`Server returned code: ${response.status}`);
-        }
-
-        const replyText = await response.text();
-        
-        if (replyText && replyText.trim().length > 0) {
-            // Displays the answer directly in your website's output box
-            aiOutput.innerText = replyText;
-        } else {
-            aiOutput.innerText = "Error: Received empty response from AI engine.";
-        }
-        aiInput.value = ""; 
-    } catch (error) {
-        // If strict browser security stops the direct link, use this fallback format
-        aiOutput.innerText = "Browser block detected. Trying fallback mode...";
-        
-        const backupUrl = `https://pollinations.ai${encodeURIComponent(prompt)}?json=false`;
-        window.location.href = backupUrl; // Navigates the current tab directly to the answer safely
+    // Simulated Triage Algorithm
+    if (prompt.includes("cow") || prompt.includes("withdrawal") || prompt.includes("opioid")) {
+        aiOutput.innerHTML = `
+            <strong>ToxiRate Triage Rules:</strong><br>
+            • Evaluate Clinical Opiate Withdrawal Scale (COWS) immediately.<br>
+            • Check for mild (5-12), moderate (13-24), or severe (36+) symptoms.<br>
+            • <em>Action:</em> Monitor vital signs and prioritize fluid balancing management.
+        `;
+    } else if (prompt.includes("hlt") || prompt.includes("liver") || prompt.includes("acetaminophen")) {
+        aiOutput.innerHTML = `
+            <strong>ToxiRate Triage Rules:</strong><br>
+            • Assess Hepatic Injury Threshold Limits (HLT).<br>
+            • Chart timeline hours post-ingestion via the Rumack-Matthew Nomogram.<br>
+            • <em>Action:</em> Alert medical staff if threshold calculation rules indicate toxic exposure.
+        `;
+    } else if (prompt.includes("help") || prompt.includes("emergency") || prompt.includes("poison")) {
+        aiOutput.innerHTML = `
+            <strong>ToxiRate Alert:</strong><br>
+            • Confirm baseline vitals (Airway, Breathing, Circulation).<br>
+            • Route immediately to local Poison Control or Emergency Response.<br>
+            • Keep calculation metrics ready for medical personnel handoff.
+        `;
+    } else {
+        aiOutput.innerHTML = `
+            <strong>Analysis Complete:</strong><br>
+            "${aiInput.value}" received. For accurate clinical tracking, use the specific ToxiRate HLT and COW slider inputs provided in the dashboard.
+        `;
     }
+
+    aiInput.value = ""; 
 }
