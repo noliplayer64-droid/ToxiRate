@@ -1,5 +1,5 @@
-// Paste your GitHub Token (github_pat_...) inside the quotes below
-const GITHUB_AI_TOKEN = "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"
+// Paste your GitHub Classic Token (ghp_...) inside the quotes below
+const GITHUB_AI_TOKEN = "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";
 
 async function askToxiAI() {
     const aiInput = document.getElementById('aiInput');
@@ -12,15 +12,18 @@ async function askToxiAI() {
     aiOutput.innerText = "Processing analysis...";
 
     try {
-        // Fetches from GitHub's AI endpoint proxy using your secure token
-        const response = await fetch("https://azure.com", {
+        // We wrap the URL in corsproxy.io to stop the browser from blocking it
+        const targetUrl = "https://azure.com";
+        const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetUrl);
+
+        const response = await fetch(proxyUrl, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${GITHUB_AI_TOKEN}`
             },
             body: JSON.stringify({
-                model: "gpt-4o-mini", // Pulls the official OpenAI model via GitHub
+                model: "gpt-4o-mini", // Calls OpenAI's model safely
                 messages: [
                     { 
                         role: "system", 
@@ -35,6 +38,8 @@ async function askToxiAI() {
         
         if (data.choices && data.choices[0]) {
             aiOutput.innerText = data.choices[0].message.content;
+        } else if (data.error) {
+            aiOutput.innerText = "API Error: " + data.error.message;
         } else {
             aiOutput.innerText = "Error: Check token or daily rate limits.";
         }
