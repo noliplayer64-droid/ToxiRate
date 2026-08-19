@@ -8,8 +8,8 @@ async function askToxiAI() {
     aiOutput.innerText = "Processing analysis...";
 
     try {
-        // We use a free, tokenless AI endpoint designed for browser applications
-        const response = await fetch(`https://pollinations.ai`, {
+        // Corrected text engine link for browser-based websites
+        const response = await fetch("https://pollinations.ai", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
