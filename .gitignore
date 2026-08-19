@@ -1,6 +1,5 @@
+# Removed by request
+
+# Keep .env and keys out of version control
 .env
 node_modules/
-# Do not commit OpenAI keys
-*.key
-*.pem
-.env.local
