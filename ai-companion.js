@@ -8,15 +8,20 @@ async function askToxiAI() {
     aiOutput.innerText = "Processing analysis...";
 
     try {
-        // We include the instructions inside the text prompt for the AI
-        const medicalSystemContext = "System Instructions: You are ToxiRate AI, an emergency poison toxicity assessment companion. Focus on triage priority. Question: ";
-        const finalPrompt = encodeURIComponent(medicalSystemContext + prompt);
+        // System context + your prompt combined
+        const systemText = "You are ToxiRate AI, an emergency poison toxicity assessment companion. Focus on triage priority. Question: ";
+        const cleanMessage = encodeURIComponent(systemText + prompt);
 
-        // A clean, open GET request that public browsers cannot block
-        const response = await fetch(`https://pollinations.ai{finalPrompt}?json=false&seed=42`);
+        // Target URL
+        const targetUrl = `https://pollinations.ai{cleanMessage}?json=false&seed=42`;
+        
+        // WE USE ALLORIGINS TO FORCE THE BROWSER TO ALLOW THE CONNECTION
+        const secureProxyUrl = `https://allorigins.win{encodeURIComponent(targetUrl)}`;
+
+        const response = await fetch(secureProxyUrl);
 
         if (!response.ok) {
-            throw new Error(`Server status error: ${response.status}`);
+            throw new Error(`Server returned status: ${response.status}`);
         }
 
         const replyText = await response.text();
@@ -28,7 +33,8 @@ async function askToxiAI() {
         }
         aiInput.value = ""; 
     } catch (error) {
-        aiOutput.innerText = "Error: Connection timed out or server busy. Please try again.";
+        aiOutput.innerText = "Error: Connection timed out or proxy busy. Please try again.";
         console.error("Connection failed:", error);
     }
 }
+
