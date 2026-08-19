@@ -8,33 +8,27 @@ async function askToxiAI() {
     aiOutput.innerText = "Processing analysis...";
 
     try {
-        // Corrected text engine link for browser-based websites
-        const response = await fetch("https://pollinations.ai", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                messages: [
-                    { 
-                        role: "system", 
-                        content: "You are an AI medical companion built into ToxiRate, an emergency poison toxicity assessment application. Focus answers on triage priority and safety metrics." 
-                    },
-                    { role: "user", content: prompt }
-                ],
-                seed: 42,
-                jsonMode: false
-            })
-        });
+        // We include the instructions inside the text prompt for the AI
+        const medicalSystemContext = "System Instructions: You are ToxiRate AI, an emergency poison toxicity assessment companion. Focus on triage priority. Question: ";
+        const finalPrompt = encodeURIComponent(medicalSystemContext + prompt);
+
+        // A clean, open GET request that public browsers cannot block
+        const response = await fetch(`https://pollinations.ai{finalPrompt}?json=false&seed=42`);
+
+        if (!response.ok) {
+            throw new Error(`Server status error: ${response.status}`);
+        }
 
         const replyText = await response.text();
         
-        if (replyText) {
+        if (replyText && replyText.trim().length > 0) {
             aiOutput.innerText = replyText;
         } else {
             aiOutput.innerText = "Error: Received empty response from AI engine.";
         }
         aiInput.value = ""; 
     } catch (error) {
-        aiOutput.innerText = "Error: Could not connect to the open AI network.";
+        aiOutput.innerText = "Error: Connection timed out or server busy. Please try again.";
         console.error("Connection failed:", error);
     }
 }
