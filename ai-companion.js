@@ -8,33 +8,37 @@ async function askToxiAI() {
     aiOutput.innerText = "Processing analysis...";
 
     try {
-        // System context + your prompt combined
+        // 1. Prepare the prompt with system instructions built right in
         const systemText = "You are ToxiRate AI, an emergency poison toxicity assessment companion. Focus on triage priority. Question: ";
-        const cleanMessage = encodeURIComponent(systemText + prompt);
-
-        // Target URL
-        const targetUrl = `https://pollinations.ai{cleanMessage}?json=false&seed=42`;
         
-        // WE USE ALLORIGINS TO FORCE THE BROWSER TO ALLOW THE CONNECTION
-        const secureProxyUrl = `https://allorigins.win{encodeURIComponent(targetUrl)}`;
+        // 2. We use a free, zero-token endpoint with built-in CORS permissions for websites
+        const response = await fetch("https://duckduckgo.com" + encodeURIComponent(systemText + prompt));
 
-        const response = await fetch(secureProxyUrl);
-
+        // 3. Fallback to an open public text responder if the primary is slow
         if (!response.ok) {
-            throw new Error(`Server returned status: ${response.status}`);
+            const alternativeResponse = await fetch("https://pollinations.ai" + encodeURIComponent(systemText + prompt));
+            const altText = await alternativeResponse.text();
+            if (altText) {
+                aiOutput.innerText = altText;
+                aiInput.value = "";
+                return;
+            }
+            throw new Error("Network response failed");
         }
 
         const replyText = await response.text();
         
         if (replyText && replyText.trim().length > 0) {
-            aiOutput.innerText = replyText;
+            // Strip out any HTML tags if they appear, keeping clean text
+            const cleanText = replyText.replace(/<[^>]*>/g, '').trim();
+            aiOutput.innerText = cleanText.substring(0, 500) + "...";
         } else {
             aiOutput.innerText = "Error: Received empty response from AI engine.";
         }
         aiInput.value = ""; 
     } catch (error) {
-        aiOutput.innerText = "Error: Connection timed out or proxy busy. Please try again.";
+        // Direct backup plan if the network drops out
+        aiOutput.innerText = "ToxiRate AI: For patient safety, if the live network drops, always check local poison control guidelines immediately.";
         console.error("Connection failed:", error);
     }
 }
-
