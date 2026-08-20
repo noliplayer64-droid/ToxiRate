@@ -1,0 +1,23 @@
+[
+  { "name": "Box Jellyfish", "hlt": 1, "cow": 5 },
+  { "name": "Sydney Funnel-web Spider", "hlt": 1, "cow": 15 },
+  { "name": "Asian Giant Hornet", "hlt": 59, "cow": 120 },
+  { "name": "Yellow-legged Hornet", "hlt": 100, "cow": 180 },
+  { "name": "Indian Red Scorpion", "hlt": 1, "cow": 120 },
+  { "name": "Inland Taipan", "hlt": 1, "cow": 120 },
+  { "name": "Deathstalker Scorpion", "hlt": 1, "cow": 150 },
+  { "name": "Cone Snail", "hlt": 1, "cow": 180 },
+  { "name": "Blue Ringed Octopus", "hlt": 1, "cow": 360 },
+  { "name": "Lion's Mane Jellyfish", "hlt": 5, "cow": 1440 },
+  { "name": "Saw-scaled Viper", "hlt": 1, "cow": 120 },
+  { "name": "Tiger Rattlesnake", "hlt": 1, "cow": 360 },
+  { "name": "King Cobra", "hlt": 1, "cow": 45 },
+  { "name": "Gaboon Viper", "hlt": 1, "cow": 60 },
+  { "name": "Slow Loris", "hlt": 1, "cow": 30 },
+  { "name": "Diamondback Rattlesnake", "hlt": 1, "cow": 180 },
+  { "name": "Brazilian Wandering Spider", "hlt": 1, "cow": 130 },
+  { "name": "Indian Cobra", "hlt": 1, "cow": 240 },
+  { "name": "Common Krait", "hlt": 1, "cow": 360 },
+  { "name": "Fat-tailed Scorpion", "hlt": 1, "cow": 270 },
+  { "name": "Coral Snake", "hlt": 1, "cow": 180 }
+]
