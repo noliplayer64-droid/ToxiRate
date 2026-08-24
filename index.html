@@ -61,6 +61,57 @@
     font-size: 0.9em;
     color: #bbb;
   }
+
+  /* AI Chatbot Styles */
+  #chatHistory {
+    border: 1px solid #444;
+    background: #0a0c15;
+    border-radius: 5px;
+    height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .bubble {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 80%;
+    word-wrap: break-word;
+  }
+
+  .bubble.user {
+    background: #ffb703;
+    color: #000;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .bubble.bot {
+    background: #2a2d4a;
+    color: #90dbf4;
+    margin-right: auto;
+  }
+
+  .thinking {
+    color: #999;
+    font-style: italic;
+  }
+
+  #aiInput {
+    width: 75% !important;
+    padding: 8px !important;
+  }
+
+  .emergency-banner {
+    background: #b71c1c;
+    color: white;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
 </style>
 </head>
 
@@ -72,17 +123,17 @@
 <h1>ToxiRate</h1>
 
 <p class="note" style="text-align:center;">
-An educational venom risk mapping and safety tool. To be used if you have just had an encounter with a dangerous animal followed by a venomous bite or sting. Also to be used if you are generally a[...]
+An educational venom risk mapping and safety tool. To be used if you have just had an encounter with a dangerous animal followed by a venomous bite or sting. Also to be used if you are generally aware of animals you may encounter.
 </p>
 
 <div class="box">
 <h2>Definitions</h2>
 <ul>
-  <li><strong>HLT:</strong> (Human Lethality Threshold) Estimated number of envenomations required to be fatal in an average healthy adult. How many stings or bites are required to kill you. To fi[...]
-  <li><strong>COW:</strong> (Critical Onset Window) Minutes before likely fatality. To find measurements for the COW, simply search "how long does a fatal ammount of (your animal) venom take to ki[...]
-  <li><strong>VRR:</strong>  (Venom Risk Rating) Combined danger score (and system works completely differently to LD50) from 1 (low) to 10 (extreme).The scale works completely differently to LD50[...]
-  <li><strong>DISCLAIMERS:</strong> If you have any allergies to wasps and other animals, Apologies, this app is based on stats for the average human. The HLT is based on a 25-year old person in g[...]
-  <li></strong>PLEASE REMEMBER:</strong> If you are attacked by an animal you deem dangerous, look it up before coming here. you may be mistaken of what it is, as many milksnakes look like the ext[...]
+  <li><strong>HLT:</strong> (Human Lethality Threshold) Estimated number of envenomations required to be fatal in an average healthy adult. How many stings or bites are required to kill you. To find measurements for the HLT, simply search "how many (your animal) bites/stings are lethal to humans".</li>
+  <li><strong>COW:</strong> (Critical Onset Window) Minutes before likely fatality. To find measurements for the COW, simply search "how long does a fatal ammount of (your animal) venom take to kill".</li>
+  <li><strong>VRR:</strong>  (Venom Risk Rating) Combined danger score (and system works completely differently to LD50) from 1 (low) to 10 (extreme).The scale works completely differently to LD50.</li>
+  <li><strong>DISCLAIMERS:</strong> If you have any allergies to wasps and other animals, Apologies, this app is based on stats for the average human. The HLT is based on a 25-year old person in good health.</li>
+  <li><strong>PLEASE REMEMBER:</strong> If you are attacked by an animal you deem dangerous, look it up before coming here. you may be mistaken of what it is, as many milksnakes look like the extremely venomous coral snake. Do your research!</li>
 
 </ul>
 </div>
@@ -93,7 +144,7 @@ An educational venom risk mapping and safety tool. To be used if you have just h
 <label for="speciesSearch">Type species name:</label>
 <input list="speciesOptions" id="speciesSearch" placeholder="Start typing..." oninput="searchSpecies()">
 
-<datalist id="speciesOptions"
+<datalist id="speciesOptions">
   <option value="Box Jellyfish">
   <option value="Sydney Funnel-web Spider">
   <option value="Asian Giant Hornet">
@@ -142,17 +193,27 @@ An educational venom risk mapping and safety tool. To be used if you have just h
 <tr><th>VRR</th><th>Meaning</th></tr>
 <tr><td>0–1–2</td><td>Low risk, refer to HLT for whether to see a doctor.</td></tr>
 <tr><td>3–4</td><td>Moderate risk, wise head to a hospital, treatment may be required</td></tr>
-<tr><<tr><td>5-6</td><td> Severe risk, head to a hospital,  treatment highly suggested</td></tr>
-<tr><<tr><td>7-8</td><td>  Highly Severe risk, get to a hospital swiftly, treatment urgently required</td></tr>
+<tr><td>5-6</td><td> Severe risk, head to a hospital,  treatment highly suggested</td></tr>
+<tr><td>7-8</td><td>  Highly Severe risk, get to a hospital swiftly, treatment urgently required</td></tr>
 <tr><td>9–10</td><td>Extremely lethal, head to hospital immediately. Immediate treatment required. Call an ambulance swiftly.</td></tr>
 </table>
 </div>
 
-<li><strong>Ask Hornet AI</strong></li>
-  <li> Ask Hornet, our trusty bot, over on Venomaid AI </li>
-  <a href="https://venom-aid-hornet.base44.app" class="button-link">Visit Venomaid</a>
-  <li> Please note that due to lack of time and skill Venom Aid AI was made using AI components. This may be changed in future.</li>
-
+<!-- ToxiRate AI Companion -->
+<div class="box">
+  <h2>ToxiRate AI Companion</h2>
+  <p class="note">Ask our AI for information about species, HLT, COW, VRR calculations, or emergency guidance.</p>
+  
+  <div id="chatHistory"></div>
+  
+  <div style="display: flex; gap: 10px; margin-top: 10px;">
+    <input type="text" id="aiInput" placeholder="Ask about HLT, COW, or toxicity rules..." style="flex: 1;">
+    <button onclick="askToxiAI()" style="width: auto; padding: 8px 16px;">Send</button>
+    <button id="clearChat" style="width: auto; padding: 8px 16px; background: #666;">Clear</button>
+  </div>
+  
+  <div id="aiOutput" style="margin-top: 15px; font-style: italic; color: #999;">AI companion ready...</div>
+</div>
 
 <script>
 const catalogue = [
@@ -177,7 +238,6 @@ const catalogue = [
   { name: "Common Krait", hlt: 1, cow: 360 },
   { name: "Fat-tailed Scorpion", hlt: 1, cow: 270 },
   { name: "Coral Snake", hlt: 1, cow: 180 }
-  
 ];
 
 function searchSpecies() {
@@ -199,32 +259,23 @@ function calculatePRR() {
   }
 
   const prr = Math.round((Math.min(10, 10 / hlt) + Math.min(10, 10 / (cow / 5))) / 2);
-  document.getElementById("output").innerText = `Poison Risk Rating: ${prr}/10`;
   const output = document.getElementById("output");
 
-output.innerText = `Poison Risk Rating: ${prr}/10`;
+  output.innerText = `Poison Risk Rating: ${prr}/10`;
 
-if (prr <= 3) {
-  output.style.color = "#4caf50";   // green
-} else if (prr <= 6) {
-  output.style.color = "#ffd54f";   // yellow
-} else if (prr <= 8) {
-  output.style.color = "#ff9800";   // orange
-} else {
-  output.style.color = "#f44336";   // red
-}
+  if (prr <= 3) {
+    output.style.color = "#4caf50";   // green
+  } else if (prr <= 6) {
+    output.style.color = "#ffd54f";   // yellow
+  } else if (prr <= 8) {
+    output.style.color = "#ff9800";   // orange
+  } else {
+    output.style.color = "#f44336";   // red
+  }
 }
 </script>
-  <!-- ToxiRate Chat Widget Interface -->
-<div class="ai-box" style="margin-top: 20px; padding: 15px; border: 1px solid #ccc; border-radius: 5px;">
-    <h3>ToxiRate AI Companion</h3>
-    <input type="text" id="aiInput" placeholder="Ask about HLT, COW, or toxicity rules..." style="width: 75%; padding: 8px;">
-    <button onclick="askToxiAI()" style="padding: 8px 12px; cursor: pointer;">Ask AI</button>
-    <div id="aiOutput" style="margin-top: 15px; font-style: italic; white-space: pre-wrap;">AI companion ready...</div>
-</div>
 
 <script src="ai-companion.js"></script>
-
 
 </body>
 </html>
